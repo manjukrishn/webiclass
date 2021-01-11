@@ -1,0 +1,20 @@
+.college-list{
+  margin-top: 5%;
+  height: 80vh;
+  overflow-y: scroll;
+  margin-bottom: 10%;
+  width: calc(100% - 10vw);
+  overflow-x:hidden;
+  padding-left:5%;
+}
+.college-list::-webkit-scrollbar {
+  background-color: white;
+  width: 10px;
+}
+.college-list::-webkit-scrollbar-thumb {
+  background-color: #b3e5fc;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: padding-box;
+  width: 5px;
+}

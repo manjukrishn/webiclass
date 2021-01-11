@@ -1,0 +1,38 @@
+.login-body {
+  width: 100%;
+  height: 100vh;
+  text-align: center;
+  background-color: #f6f8ff;
+}
+.login-container {
+  width: 20%; /* Can be in percentage also. */
+  height: auto;
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+}
+
+.login-email {
+  width: 85%;
+  font-family: "Nunito", sans-serif;
+}
+.login-password {
+  width: 85%;
+  font-family: "Nunito", sans-serif;
+}
+.login-logo {
+  font-size: 34px;
+  font-family: "Audiowide", cursive;
+  color: #6d58ff;
+}
+.login-signIn {
+  margin-top: 10px;
+}
+.login-register {
+  color: grey;
+}
+.login-register:hover {
+  color:black;
+  text-decoration: underline;
+}

@@ -1,0 +1,38 @@
+.register-body {
+  width: 100%;
+  height: 100vh;
+  text-align: center;
+  background-color: #f6f8ff;
+}
+.register-container {
+  width: 20%; /* Can be in percentage also. */
+  height: auto;
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+}
+
+.register-email {
+  width: 85%;
+  font-family: "Nunito", sans-serif;
+}
+.register-password {
+  width: 85%;
+  font-family: "Nunito", sans-serif;
+}
+.register-logo {
+  font-size: 34px;
+  font-family: "Audiowide", cursive;
+  color: #6d58ff;
+}
+.register-signUp {
+  margin-top: 10px;
+}
+.register-login {
+  color: grey;
+}
+.register-login:hover {
+  color: black;
+  text-decoration: underline;
+}

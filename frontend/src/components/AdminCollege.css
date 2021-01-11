@@ -1,0 +1,49 @@
+.admin-college-body {
+  width: 100%;
+  height: 100vh;
+  text-align: center;
+  background-color: #f6f8ff;
+}
+.admin-college-container {
+  width: 20%; /* Can be in percentage also. */
+  height: auto;
+  position: absolute;
+  top: 50%;
+  left:38%;
+  transform: translate(-50%, -50%);
+}
+.admin-college-logo {
+  font-size: 34px;
+  margin-bottom: 20px;
+  font-family: "Audiowide", cursive;
+  color: #6d58ff;
+}
+.admin-college-signUp {
+  margin-top: 10px;
+}
+.admin-college-add-photo {
+  background: #eceffc;
+  cursor: pointer;
+  color: #a6accd;
+}
+
+
+.container-div::-webkit-scrollbar-thumb {
+  background-color: #b3e5fc;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: padding-box;
+  width: 5px;
+}
+.container-div::-webkit-scrollbar {
+  background-color: white;
+  width: 10px;
+  border-radius: 8px;
+}
+.admin-main-go-home {
+  color: grey;
+}
+.admin-main-go-home:hover {
+  color: black;
+  text-decoration: underline;
+}

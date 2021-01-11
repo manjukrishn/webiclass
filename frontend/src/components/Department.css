@@ -1,0 +1,11 @@
+.desc-cards::-webkit-scrollbar {
+  background-color: white;
+  width: 15px;
+}
+.desc-cards::-webkit-scrollbar-thumb {
+  background-color: #b3e5fc;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: padding-box;
+  width: 15px;
+}
