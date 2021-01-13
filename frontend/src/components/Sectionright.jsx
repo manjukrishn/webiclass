@@ -1,9 +1,36 @@
 import React from "react";
 import Table from "./DescTable";
 import Tooltip from "@material-ui/core/Tooltip";
-
 import AddMaterial from "./AddMaterial";
+
 export default function Secright(props) {
+  const [materials,setMaterials]=React.useState([]);
+  React.useEffect(()=>{
+    console.log(props.sec_id)
+    fetch("/getSectionTable",{
+      method:"POST",
+      cache:"no-cache",
+      headers:{
+        "content_type":"application/json",
+      },
+      body:JSON.stringify({secId:props.secId,dept:props.dept})
+     }).then(response=>response.json()).then(
+    data=>{
+    const arr=[]
+    data.material.map((item,index)=>arr.push(
+    {
+      link:item[0],
+      desc:item[1],
+      type:item[2],
+      faculty:item[3],
+      subject:item[4],
+      dept:item[5],
+      date_added:item[6]
+    }))
+    console.log(arr);
+    setMaterials(arr);
+});
+},[props.secId]);
   let paddingLeft = "5%";
   const width =
     window.innerWidth ||
@@ -43,7 +70,7 @@ export default function Secright(props) {
             </h1>
           </td>
           <td>
-            <AddMaterial />
+            <AddMaterial secId={props.secId}/>
           </td>
         </tr>
       </table>
@@ -55,7 +82,7 @@ export default function Secright(props) {
           marginBottom: "50px"
         }}
       >
-        <Table caption="Recently Added Materials" type="section" />
+        <Table caption="Recently Added Materials" type="section" contents={materials} />
       </div>
     </div>
   );

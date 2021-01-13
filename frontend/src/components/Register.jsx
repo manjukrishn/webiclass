@@ -57,9 +57,9 @@ export default function Register() {
          invalidEmail:false
        });
      
-     history.push('/home');
+     history.push('/login');
     }
-    else if(value==="Email Already Exist"){
+    else if(value==="Email Already exist"){
        setError({
          invalidEmail:true
        })

@@ -20,15 +20,18 @@ import {
   isHod
 } from "./components/Util";
 export default function App() {
-
-  const subRoutes = [
-    "/Basic Science",
-    "/Computer Science",
-    "/Civil Engineering",
-    "/Information Science",
-    "/Electronics and Communication",
-    "/Mechanical Engineering"
-  ];
+  const [dept,setDeptList]=React.useState([]);
+  React.useEffect(()=>{
+    fetch("/getDepartment").then(response=>response.json()).then
+     (data=>{
+      const arr=[]
+      console.log(data.dept);
+      data.dept.map((item,index)=>
+      arr.push(item[0])
+      )
+      setDeptList(arr);
+  });
+  },[]);
   return (
     <div style={{ height: "100%" }}>
       <Router>
@@ -48,8 +51,8 @@ export default function App() {
           {isAdminCollege() && (
             <PrivateRoute path={"/admin-college"} component={AdminCollege} />
           )}
-          {subRoutes.map((item, index) => {
-            return <PrivateRoute path={item} component={Dept} />;
+          {dept.map((item, index) => {
+            return <PrivateRoute path={"/"+item} component={Dept} />;
           })}
           <Route component={PageNotFound} />
         </Switch>

@@ -16,7 +16,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import Radio from "@material-ui/core/Radio";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
-const options = ["Notes", "Video", "Attendance", "Other"];
+const options = ["Notes", "Video", "Attendance"];
 
 function ConfirmationDialogRaw(props) {
   const { onClose, value: valueProp, open, ...other } = props;
@@ -49,6 +49,7 @@ function ConfirmationDialogRaw(props) {
   };
 
   const handleOk = () => {
+    props.addValues(value);
     onClose(value);
   };
 
@@ -84,13 +85,6 @@ function ConfirmationDialogRaw(props) {
             />
           ))}
         </RadioGroup>
-        {!!(value === "Other") && (
-          <InputBase
-            className={classes.margin}
-            placeholder="Type your preferred type"
-            inputProps={{ "aria-label": "naked" }}
-          />
-        )}
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={handleCancel} color="primary">
@@ -121,7 +115,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function ConfirmationDialog() {
+export default function ConfirmationDialog(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("Notes");
@@ -129,7 +123,10 @@ export default function ConfirmationDialog() {
   const handleClickListItem = () => {
     setOpen(true);
   };
-
+  
+  const addValues=(values)=>{
+      props.addValues(values);
+  }
   const handleClose = (newValue) => {
     setOpen(false);
 
@@ -159,6 +156,7 @@ export default function ConfirmationDialog() {
         keepMounted
         open={open}
         onClose={handleClose}
+        addValues={addValues}
         value={value}
       />
     </div>

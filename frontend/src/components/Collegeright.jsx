@@ -9,14 +9,12 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import "./College.css";
-export default function College() {
+export default function College(props) {
   const useStyles = makeStyles({
     root: {
       maxWidth: 345
     }
   });
-  const colleges = ["Sahyadri"];
-
   const classes = useStyles();
   return (
     <div
@@ -43,7 +41,7 @@ export default function College() {
       />
       <div className="college-list">
         <Grid container spacing={3}>
-          {colleges.map((item, index) => {
+          {props.colleges.map((item, index) => {
             return (
               <Grid item xs={6}>
                 <Card className={classes.root}>
@@ -64,7 +62,7 @@ export default function College() {
                         component="h2"
                         style={{ fontFamily: 'Nunito", sans-serif' }}
                       >
-                        Sahyadri College of Engineering and Managment
+                      {item.college_name}
                       </Typography>
                     </CardContent>
                   </CardActionArea>

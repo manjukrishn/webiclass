@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import CardContent from "@material-ui/core/CardContent";
 import Tooltip from "@material-ui/core/Tooltip";
-
 import "./Department.css";
 import AddClass from "./AddClass";
 import { useLocation } from "react-router-dom";
@@ -18,7 +17,7 @@ function getDept() {
   for (let i = 0; i < res.length; i++) fres += res[i] + " ";
   return fres.trim();
 }
-const sec = ["1A", "1B", "2V", "2W", "2v"];
+let sec = [];
 const colors = [
   "a0d1ff",
   "9ab3f5",
@@ -33,22 +32,27 @@ const colors = [
 ];
 export default function Deptright(prop) {
   const location = useLocation();
+  sec=prop.section;
   const [view, setView] = React.useState(false);
   const [heading, setHeading] = React.useState();
-
+  const [sec_id,setSecId]=React.useState();
+  
   React.useEffect(() => {
     setView(false);
   }, [location]);
+
   function viewer(value) {
     setView(value);
   }
-  function section(value) {
+  function section(value,sec_id) {
     setHeading(value);
+    setSecId(sec_id);
   }
+
   return !view ? (
     <Dept onView={viewer} changeSection={section} />
   ) : (
-    <Sectionright heading={heading} />
+    <Sectionright heading={heading} secId={sec_id} dept={getDept()} />
   );
 }
 
@@ -124,7 +128,7 @@ function Dept(prop) {
                 }}
                 onClick={() => {
                   prop.onView(true);
-                  prop.changeSection(item);
+                  prop.changeSection(item.section_name,item.section_id);
                 }}
               >
                 <CardContent
@@ -148,7 +152,7 @@ function Dept(prop) {
                       fontSize: "30px"
                     }}
                   >
-                    {item}
+                    {item.section_name}
                   </Typography>
                   <Typography>
                     <ul
@@ -159,8 +163,8 @@ function Dept(prop) {
                         marginLeft: "-35%"
                       }}
                     >
-                      <li>34 students</li>
-                      <li>6 subjects</li>
+                      <li>{item.no_of_students} students</li>
+                      <li>{item.no_of_subjects} subjects</li>
                     </ul>
                   </Typography>
                 </CardContent>

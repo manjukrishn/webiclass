@@ -7,6 +7,8 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SchoolIcon from "@material-ui/icons/School";
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 export default function Sidebar(props) {
+  const [dept,setDeptList]=React.useState([]);
+ 
   React.useEffect(() => {
     const cls = "style-onhover";
     const str = window.location.pathname.split("/");
@@ -21,16 +23,17 @@ export default function Sidebar(props) {
       const elnt = document.getElementById(str[1]);
       elnt.className += " " + cls;
     }
+    fetch("/getDepartment").then(response=>response.json()).then
+     (data=>{
+      const arr=[]
+      console.log(data.dept);
+      data.dept.map((item,index)=>
+      arr.push(item[0])
+      )
+      console.log(arr);
+      setDeptList(arr);
+  });
   }, []);
-  const dept = [
-    "Basic Science",
-    "Computer Science",
-    "Civil Engineering",
-    "Information Science",
-    "Electronics and Communication",
-    "Mechanical Engineering"
-  ];
-
   const getRandom = (index) => {
     let color3 = [
       "FD3A4A",

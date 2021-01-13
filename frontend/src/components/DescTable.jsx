@@ -20,6 +20,17 @@ export default function DescTable(props) {
     const newWindow=window.open(url,"_blank","noopener,noreferrer");
     if(newWindow) newWindow.opener=null;
   }
+  const handleDelete=(e)=>{
+    props.setFlag(true)
+    fetch("/deleteMaterial",{
+      method:"POST",
+      cache:"no-cache",
+      headers:{
+        "content_type":"application/json",
+      },
+      body:JSON.stringify({link:e})
+     }).then(response=>response.json()).then(data=>{console.log(data)});
+  }
   return (
     <div style={{ backgroundColor: "#f2f2f0" }}>
       <table className="desc-table">
@@ -171,6 +182,7 @@ export default function DescTable(props) {
                     >
                       <RemoveCircleOutlineRoundedIcon
                         color="secondary"
+                        onClick={()=>handleDelete(item.link)}
                         style={{ fontSize: "16px" }}
                       />
                     </div>
