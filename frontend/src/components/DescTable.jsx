@@ -133,38 +133,32 @@ export default function DescTable(props) {
                 <td
                   style={{
                     textAlign: "center",
-                    width: "16.67%",
-                    wordBreak:"break-all"
+                    width: "16.67%"
                   }}
                 >
                   {item.desc}
                 </td>
-                <td style={{ textAlign: "center", width: "16.67%",
-                    wordBreak:"break-all" }}>{item.type}</td>
-                <td style={{ textAlign: "center", width: "16.67%",
-                    wordBreak:"break-all" }}>
+                <td style={{ textAlign: "center", width: "16.67%" }}>{item.type}</td>
+                <td style={{ textAlign: "center", width: "16.67%" }}>
                   {item.faculty}
                 </td>
-                <td style={{ textAlign: "center", width: "16.67%",
-                    wordBreak:"break-all" }}>
+                <td style={{ textAlign: "center", width: "16.67%" }}>
                 {item.subject}
                 </td>
                 <td
                   style={{
-                    textAlign: "center",
+                    textAlign: "left",
                     width: "16.67%",
-                    paddingLeft: "2%",
-                    wordBreak:"break-all"
+                    paddingLeft: "4.2%"
                   }}
                 >
                 {item.dept}
                 </td>
                 <td
                   style={{
-                    textAlign: "center",
+                    textAlign: "left",
                     width: "16.67%",
-                    paddingLeft: "28px",
-                    wordBreak:"break-all"
+                    paddingLeft: "4.5%"
                   }}
                 >
                 {item.date_added}
@@ -195,42 +189,42 @@ export default function DescTable(props) {
              <td
               style={{
                   textAlign: "center",
-                  width: "16.67%",
-                  wordBreak:"break-all"
+                  width: "16.67%"
                }}
                >
-                  mdadmlmcxzzzzccsad
+                 Video on Bellman ford algorithm
                 </td>
-                <td style={{ textAlign: "center", width: "16.67%",
-                    wordBreak:"break-all" }}>vcxcvxxcv</td>
-                <td style={{ textAlign: "center", width: "16.67%",
-                    wordBreak:"break-all" }}>
-                  xcvvcx
+                <td style={{ textAlign: "center", width: "16.67%" }}>
+                  Video doing
                 </td>
-                <td style={{ textAlign: "center", width: "16.67%",
-                    wordBreak:"break-all" }}>
-                cvxcxvcvx
+                <td style={{ textAlign: "center", width: "16.67%" }}>
+                Manju Krishna
                 </td>
                 <td
                   style={{
                     textAlign: "center",
                     width: "16.67%",
-                    paddingLeft: "2%",
-                    wordBreak:"break-all"
+                    paddingLeft: "2%"
                   }}
                 >
-                cvxcvxcvx
+                Computer Networks
                 </td>
                 <td
                   style={{
                     textAlign: "center",
                     width: "16.67%",
-                    paddingLeft: "28px",
-                    wordBreak:"break-all"
+                    paddingLeft: "28px"
                   }}
                 >
-                cvxxcv
+                Information Science
                 </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    width: "16.67%",
+                    paddingLeft: "28px"
+                  }}
+                >20 Dec 2020</td>
               </tr>
         </tbody>
       </table>

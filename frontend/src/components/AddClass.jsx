@@ -17,7 +17,11 @@ function ConfirmationDialogRaw(props) {
   const { onClose, value: valueProp, open, ...other } = props;
   const [value, setValue] = React.useState(valueProp);
   const radioGroupRef = React.useRef(null);
-
+  const [sectionValues,setSectionValues]=React.useState({
+    section:"",
+    no_of_subjects:0,
+    no_of_students:0
+  }) 
   React.useEffect(() => {
     if (!open) {
       setValue(valueProp);
@@ -35,13 +39,29 @@ function ConfirmationDialogRaw(props) {
   };
 
   const handleOk = () => {
+    fetch("/addSection",{
+      method:"POST",
+      cache:"no-cache",
+      headers:{
+        "content_type":"application/json",
+      },
+      body:JSON.stringify({class:sectionValues})
+     }).then(response=>response.json()).then(data=>{console.log(data);});
     onClose(value);
   };
-
+  
   const handleChange = (event) => {
     setValue(event.target.value);
   };
-
+  const handleSectionChange=(e)=>{
+    const {name,value}=e.target;
+    setSectionValues((prev)=>{
+      return{
+        ...prev,
+        [name]:value
+      }
+    })
+  }
   return (
     <Dialog
       disableBackdropClick
@@ -65,6 +85,9 @@ function ConfirmationDialogRaw(props) {
             min: 0,
             style: { fontSize: "100px", textAlign: "center" }
           }}
+          value={sectionValues.section}
+          name="section"
+          onChange={handleSectionChange}
         />
         <table>
           <tr>
@@ -87,6 +110,10 @@ function ConfirmationDialogRaw(props) {
                   min: 0,
                   color: "black"
                 }}
+                value={sectionValues.no_of_students}
+                name="no_of_students"
+                onChange={handleSectionChange}
+
               />
             </td>
           </tr>
@@ -108,11 +135,14 @@ function ConfirmationDialogRaw(props) {
             </td>
             <td style={{ paddingLeft: "20px", paddingTop: "20px" }}>
               <TextField
+                name="no_of_subjects"
                 style={{ width: "60px" }}
                 inputProps={{
                   min: 0,
                   color: "black"
                 }}
+                value={sectionValues.no_of_subjects}
+                onChange={handleSectionChange}
               />
             </td>
           </tr>

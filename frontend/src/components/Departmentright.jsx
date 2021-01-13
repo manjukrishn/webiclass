@@ -50,7 +50,7 @@ export default function Deptright(prop) {
   }
 
   return !view ? (
-    <Dept onView={viewer} changeSection={section} />
+    <Dept onView={viewer} changeSection={section} dept={getDept()} />
   ) : (
     <Sectionright heading={heading} secId={sec_id} dept={getDept()} />
   );

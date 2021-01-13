@@ -71,7 +71,7 @@ export default function FullScreenDialog(props) {
       body:JSON.stringify({material:addMaterial})
      }).then(response=>response.json()).then(data=>{console.log(data);});
     setOpen(false);
-
+    props.flag(true);
   }
   const getDate = () => {
     var today = new Date();

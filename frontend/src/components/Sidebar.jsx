@@ -97,7 +97,7 @@ export default function Sidebar(props) {
               })}
             </table>
           </ul>
-          <li tabindex="2" id="profile" style={{ marginTop: "5%" }}>
+          <li tabindex="2" id="profile" style={{ marginTop: "8%" }}>
             {isAdmin() && (
               <Link to="profile">
                 <PersonPinIcon className="img-sidebar" />

@@ -5,6 +5,7 @@ import AddMaterial from "./AddMaterial";
 
 export default function Secright(props) {
   const [materials,setMaterials]=React.useState([]);
+  const [flag,setFla]=React.useState(false);
   React.useEffect(()=>{
     console.log(props.sec_id)
     fetch("/getSectionTable",{
@@ -30,7 +31,10 @@ export default function Secright(props) {
     console.log(arr);
     setMaterials(arr);
 });
-},[props.secId]);
+},[flag]);
+function setFlag(e){
+  setFla(e);
+}
   let paddingLeft = "5%";
   const width =
     window.innerWidth ||
@@ -70,7 +74,7 @@ export default function Secright(props) {
             </h1>
           </td>
           <td>
-            <AddMaterial secId={props.secId}/>
+            <AddMaterial secId={props.secId} flag={setFlag}/>
           </td>
         </tr>
       </table>

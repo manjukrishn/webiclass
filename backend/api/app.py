@@ -16,9 +16,11 @@ conn=sqlite3.connect('Webiclass.db')
 #c.execute('CREATE TABLE OTHERS(EMAIL TEXT PRIMARY KEY,PASSWORD TEXT NOT NULL,COLLEGE_NAME TEXT, FOREIGN KEY(COLLEGE_NAME) REFERENCES COLLEGE(COLLEGE_NAME))')
 #c.execute('ALTER TABLE OTHERS RENAME TO CREDENTIALS')
 #c.execute('CREATE TABLE ARCHIVED_COLLEGE(URL TEXT)')
-
+# c=conn.cursor()
+# c.execute("CREATE TRIGGER INSERT_INTO_CREDENTIALS AFTER INSERT ON FACULTY BEGIN UPDATE CREDENTIALS SET ROLE='Asst. Prof' WHERE C.EMAIL=(SELECT EMAIL FROM FACULTY);END;")
 currentCollege="none"
 currentUser="none"
+conn.close()
 def setCurrentCollege(emailQueried):
   conn=sqlite3.connect('Webiclass.db')
   c=conn.cursor()
@@ -80,9 +82,7 @@ def register():
   if(len(rowEmail)>=1):
     status="Email Already exist"
   else:
-     queryRole=c.execute("SELECT ROLE FROM FACULTY WHERE MAIL_ID="+"\'"+email+"\'")
-     queryRole=queryRole.fetchall()
-     queryCredential="INSERT INTO CREDENTIALS VALUES("+"\'"+email+"\'"+","+"\'"+password+"\'"+","+"\'"+college+"\'"+","+"\'"+queryRole[0][0]+"\'"+")"
+     queryCredential="INSERT INTO CREDENTIALS VALUES("+"\'"+email+"\'"+","+"\'"+password+"\'"+","+"\'"+college+"\'"+","+"NULL)"
      insertCredential= c.execute(queryCredential)
      conn.commit()
      conn.close()
@@ -207,6 +207,18 @@ def addMaterial():
    material=data['material']
    print(material)
    c.execute("INSERT INTO MATERIAL VALUES("+"\'"+material["link"]+"\'"+","+"\'"+currentCollege+"\'"+","+"\'"+material["types"]+"\'"+","+"\'"+material["date"]+"\'"+","+"\'"+material["subject"]+"\'"+","+"\'"+material["secId"]+"\'"+","+"\'"+material["facultyMailId"]+"\'"+","+"\'"+material['desc']+"\')")
+   conn.commit()   
+   conn.close()
+   return {"status":"success"}
+
+@app.route('/addSection',methods=['POST'])
+def addSection():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   link=data['class']
+   print(link)
+   c.execute("INSERT INTO SECTION VALUES("+"\'"+link)
    conn.commit()   
    conn.close()
    return {"status":"success"}
