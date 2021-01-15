@@ -1,8 +1,7 @@
 import React from "react";
-import Sidebar from "./Sidebar";
 import Deptright from "./Departmentright";
-import RouteWithSubRoutes from "./RouteWithSubroutes";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import Loading from "./LoadingContent";
+
 export default function Dept({ routes }) {
   function getDept() {
     let str = window.location.pathname.split("/");
@@ -15,6 +14,12 @@ export default function Dept({ routes }) {
     return fres.trim();
   }
   const [sections,setSection] = React.useState([]);
+  const [loading,setLoading]=React.useState(true);
+
+  function setLoad(){
+    setLoading(false);
+  }
+
   React.useEffect(()=>{
     fetch("/getSection",{
       method:"POST",
@@ -34,19 +39,12 @@ export default function Dept({ routes }) {
       console.log(arr);
       setSection(arr);      
     })
+   setTimeout(setLoad,2000)
   },[getDept()]);
+
   return (
     <div style={{ height: "100%" }}>
-      <table>
-        <tr>
-          <td style={{ width: "275px" }}>
-            <Sidebar tobe="home" />
-          </td>
-          <td colspan="15">
-            <Deptright section={sections}/>
-          </td>
-        </tr>
-      </table>
-    </div>
+      {!loading ? <Deptright section={sections}/> : <Loading/>}    
+   </div>
   );
 }

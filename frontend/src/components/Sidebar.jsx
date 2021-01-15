@@ -5,14 +5,20 @@ import { Link } from "react-router-dom";
 import HomeIcon from "@material-ui/icons/Home";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import SchoolIcon from "@material-ui/icons/School";
+import { useLocation, Switch } from 'react-router-dom'; 
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 export default function Sidebar(props) {
-  const [dept,setDeptList]=React.useState([]);
- 
+  const location=useLocation();
   React.useEffect(() => {
     const cls = "style-onhover";
     const str = window.location.pathname.split("/");
     console.log(str);
+    let element=document.getElementById("home");
+    element.className-=" "+cls;
+    element=document.getElementById("colleges");
+    element.className-=" "+cls;
+    element=document.getElementById("profile");
+    element.className-=" "+cls;
     if (
       str[1] === "home" ||
       !str[1] ||
@@ -20,20 +26,11 @@ export default function Sidebar(props) {
       str[1] === "profile"
     ) {
       if (!str[1]) str[1] = "home";
+ 
       const elnt = document.getElementById(str[1]);
       elnt.className += " " + cls;
     }
-    fetch("/getDepartment").then(response=>response.json()).then
-     (data=>{
-      const arr=[]
-      console.log(data.dept);
-      data.dept.map((item,index)=>
-      arr.push(item[0])
-      )
-      console.log(arr);
-      setDeptList(arr);
-  });
-  }, []);
+  }, [location]);
   const getRandom = (index) => {
     let color3 = [
       "FD3A4A",
@@ -71,7 +68,7 @@ export default function Sidebar(props) {
                 marginTop: "-10px"
               }}
             >
-              {dept.map((item, index) => {
+              {props.dept.map((item, index) => {
                 return (
                   <Link to={item}>
                     <tr>

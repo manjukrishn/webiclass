@@ -1,8 +1,15 @@
-import Sidebar from "./Sidebar";
 import CollegeRight from "./Collegeright";
 import React from "react";
+import Loading from "./LoadingContent";
+
 export default function College() {
   const [collegeList,setCollegeList]=React.useState([]);
+  const [loading,setLoading]=React.useState(true);
+
+  function setLoad(){
+    setLoading(false);
+  }
+  
   React.useEffect(()=>{
     fetch("/college").then(response=>response.json()).then
     (data=>{
@@ -15,20 +22,13 @@ export default function College() {
       }))
       console.log(arr);
       setCollegeList(arr);
-  });    
+      setTimeout(setLoad,2000)
+  }); 
   },[]);
+
   return (
     <div style={{ height: "100%" }}>
-      <table>
-        <tr>
-          <td style={{ width: "275px" }}>
-            <Sidebar tobe="colleges"/>
-          </td>
-          <td colspan="15" style={{width:"calc(100vw - 275px)"}}>
-            <CollegeRight colleges={collegeList} />
-          </td>
-        </tr>
-      </table>
+    {!loading ? <CollegeRight colleges={collegeList} /> : <Loading/>}
     </div>
   );
 }

@@ -4,23 +4,28 @@ import time
 
 app=Flask(__name__)
 conn=sqlite3.connect('Webiclass.db')
+c=conn.cursor()
 #c.execute("CREATE TRIGGER insert_into_college AFTER INSERT ON COLLEGE BEGIN DELETE FROM ARCHIVED_COLLEGE WHERE URL=(SELECT C.URL FROM COLLEGE C,ARCHIVED_COLLEGE A WHERE A.URL=C.URL);END;")
+# c.execute("CREATE TABLE COLLEGE(URL TEXT PRIMARY KEY, NAME TEXT,IMAGE TEXT)")
+# c.execute("CREATE TABLE ADMINDEPT(MAIL_ID TEXT PRIMARY KEY,NAME TEXT,DEPT_ID TEXT,FOREIGN KEY(DEPT_ID) REFERENCES DEPARTMENT(DEPT_ID))")
+# c.execute("CREATE TABLE ADMINMAIN(MAIL_ID TEXT PRIMARY KEY,NAME TEXT)")
+# c.execute('CREATE TABLE ADMINCOLLEGE(MAIL_ID TEXT PRIMARY KEY,NAME TEXT,URL TEXT, FOREIGN KEY(URL) REFERENCES COLLEGE(URL) ON UPDATE CASCADE)')
+# c.execute('CREATE TABLE STUDENT(MAIL_ID TEXT PRIMARY KEY,NAME TEXT,SECID TEXT, FOREIGN KEY(SECID) REFERENCES SECTION(SECTION_ID) ON UPDATE CASCADE)')
 #c.execute('CREATE TABLE COLLEGE(URL TEXT PRIMARY KEY,COLLEGE_NAME TEXT NOT NULL, ADMIN_MAIL_ID NOT NULL)')
 #c.execute('CREATE TABLE DEPARTMENT(DEPT_ID TEXT PRIMARY KEY, DEPT_NAME TEXT NOT NULL, COLLEGE_NAME TEXT NOT NULL, FOREIGN KEY(COLLEGE_NAME) REFERENCES COLLEGE(COLLEGE_NAME) ON DELETE CASCADE)')
 #c.execute('CREATE TABLE FACULTY(MAIL_ID TEXT PRIMARY KEY, ROLE TEXT, NAME TEXT, HOD_MAIL_ID TEXT NOT NULL, DEPT_ID TEXT NOT NULL, FOREIGN KEY (DEPT_ID) REFERENCES DEPARTMENT(DEPT_ID))')
 #c.execute('CREATE TABLE FACULTY(MAIL_ID TEXT PRIMARY KEY, ROLE TEXT, NAME TEXT, DEPT_ID TEXT NOT NULL, FOREIGN KEY (DEPT_ID) REFERENCES DEPARTMENT(DEPT_ID))')
+#c.execute('CREATE TABLE SECTION(SECTION_ID TEXT PRIMARY KEY, SECTION_NAME TEXT NOT NULL, NO_OF_SUBJECTS INTEGER, NO_OF_STUDENTS INTEGER, DEPT_ID TEXT, FOREIGN KEY(DEPT_ID) REFERENCES DEPARTMENT(DEPT_ID))')
+#c.execute('CREATE TABLE ARCHIVED_COLLEGE(URL TEXT)')
+#c.execute('CREATE TABLE MATERIAL(LINK TEXT PRIMARY KEY,COLLEGE_NAME TEXT NOT NULL, TYPE TEXT NOT NULL, DATE_ADDED TEXT, SUBJECT_NAME TEXT NOT NULL, SECTION_ID TEXT, FACULTY_MAIL_ID TEXT, FOREIGN KEY(COLLEGE_NAME) REFERENCES COLLEGE(COLLEGE_NAME), FOREIGN KEY(SECTION_ID) REFERENCES SECTION(SECTION_ID), FOREIGN KEY(FACULTY_MAIL_ID) REFERENCES FACULTY(MAIL_ID))')
 #c.execute('ALTER TABLE DEPARTMENT ADD COLUMN HOD_MAIL_ID TEXT REFERENCES FACULTY(MAIL_ID)')
 #c.execute('ALTER TABLE FACULTY ADD COLUMN HOD_MAIL_ID TEXT REFERENCES FACULTY(MAIL_ID)')
-#c.execute('CREATE TABLE SECTION(SECTION_ID TEXT PRIMARY KEY, SECTION_NAME TEXT NOT NULL, NO_OF_SUBJECTS INTEGER, NO_OF_STUDENTS INTEGER, DEPT_ID TEXT, FOREIGN KEY(DEPT_ID) REFERENCES DEPARTMENT(DEPT_ID))')
-#c.execute('CREATE TABLE MATERIAL(LINK TEXT PRIMARY KEY,COLLEGE_NAME TEXT NOT NULL, TYPE TEXT NOT NULL, DATE_ADDED TEXT, SUBJECT_NAME TEXT NOT NULL, SECTION_ID TEXT, FACULTY_MAIL_ID TEXT, FOREIGN KEY(COLLEGE_NAME) REFERENCES COLLEGE(COLLEGE_NAME), FOREIGN KEY(SECTION_ID) REFERENCES SECTION(SECTION_ID), FOREIGN KEY(FACULTY_MAIL_ID) REFERENCES FACULTY(MAIL_ID))')
-#c.execute('CREATE TABLE OTHERS(EMAIL TEXT PRIMARY KEY,PASSWORD TEXT NOT NULL,COLLEGE_NAME TEXT, FOREIGN KEY(COLLEGE_NAME) REFERENCES COLLEGE(COLLEGE_NAME))')
-#c.execute('ALTER TABLE OTHERS RENAME TO CREDENTIALS')
-#c.execute('CREATE TABLE ARCHIVED_COLLEGE(URL TEXT)')
 # c=conn.cursor()
-# c.execute("CREATE TRIGGER INSERT_INTO_CREDENTIALS AFTER INSERT ON FACULTY BEGIN UPDATE CREDENTIALS SET ROLE='Asst. Prof' WHERE C.EMAIL=(SELECT EMAIL FROM FACULTY);END;")
+conn.commit()
 currentCollege="none"
 currentUser="none"
 conn.close()
+
 def setCurrentCollege(emailQueried):
   conn=sqlite3.connect('Webiclass.db')
   c=conn.cursor()
@@ -75,15 +80,14 @@ def register():
   data=request.json
   email=data['email']
   password=data['password']
-  college=data['college']
   queryEmail="SELECT * FROM CREDENTIALS WHERE EMAIL=\'"+email+"\'"
   rowEmail=c.execute(queryEmail)
   rowEmail=rowEmail.fetchall()
   if(len(rowEmail)>=1):
     status="Email Already exist"
   else:
-     queryCredential="INSERT INTO CREDENTIALS VALUES("+"\'"+email+"\'"+","+"\'"+password+"\'"+","+"\'"+college+"\'"+","+"NULL)"
-     insertCredential= c.execute(queryCredential)
+     queryCredential="INSERT INTO CREDENTIALS VALUES("+"\'"+email+"\'"+","+"\'"+password+"\'"+","+"STUDENT)"
+     c.execute(queryCredential)
      conn.commit()
      conn.close()
      status="Success"
@@ -103,7 +107,7 @@ def get_admin_main():
       try:
         print(college)
         if(data['approve']):
-          e.execute("INSERT INTO COLLEGE(URL,COLLEGE_NAME,ADMIN_MAIL_ID) SELECT URL,COLLEGE_NAME,ADMIN_ID FROM ARCHIVED_COLLEGE WHERE URL="+"\'"+college+"\'")        
+          e.execute("INSERT INTO COLLEGE(URL,NAME,IMAGE) SELECT URL,NAME,IMAGE FROM ARCHIVED_COLLEGE WHERE URL="+"\'"+college+"\'")        
         e.execute("DELETE FROM ARCHIVED_COLLEGE WHERE URL="+"\'"+college+"\'")
         status="Success"
       except:
@@ -119,11 +123,14 @@ def get_admin_main():
       conn.close()
       return {"college_url":queryC} 
 
-@app.route('/home',methods=['GET'])
+@app.route('/home',methods=['POST'])
 def home():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
-   material=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION,M.TYPE,F.NAME,M.SUBJECT_NAME,D.DEPT_NAME,M.DATE_ADDED FROM MATERIAL M,FACULTY F,DEPARTMENT D WHERE F.MAIL_ID=M.FACULTY_MAIL_ID AND F.DEPT_ID=D.DEPT_ID AND M.COLLEGE_NAME="+"\'"+currentCollege+"\'")
+   data=request.json
+   deptid=data['deptid']
+   currentCollege=c.execute("SELECT URL FROM DEPARTMENT WHERE ID="+"\'"+deptid+"\'")
+   material=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION,M.TYPE,F.NAME,S.NAME,D.NAME,M.DATE_ADDED FROM MATERIAL M,FACULTY F,DEPARTMENT D,SUBJECT S WHERE M.SUBID=S.ID AND S.EMAIL=F.EMAIL AND D.ID="+"\'"+deptid+"\'")
    material=material.fetchall()
    conn.close()
    return {"material":material,"college_name":currentCollege}
@@ -137,11 +144,13 @@ def college():
    conn.close()
    return {"colleges":colleges}
 
-@app.route('/getDepartment',methods=['GET'])
+@app.route('/getDepartment',methods=['POST'])
 def dept():
    conn=sqlite3.connect('Webiclass.db')     
    c=conn.cursor()
-   dept=c.execute("SELECT DEPT_NAME FROM DEPARTMENT WHERE COLLEGE_NAME="+"\'"+currentCollege+"\'")
+   data=request.json
+   url=data['url']
+   dept=c.execute("SELECT NAME FROM DEPARTMENT WHERE URL="+"\'"+url+"\'")
    dept=dept.fetchall()
    conn.close()
    return {"dept":dept}
@@ -151,12 +160,10 @@ def getSection():
    conn=sqlite3.connect('Webiclass.db')     
    c=conn.cursor()
    data=request.json
-   dept=data['dept']
-   print(dept)
-   dept=c.execute("SELECT S.SECTION_ID,S.SECTION_NAME,S.NO_OF_SUBJECTS,S.NO_OF_STUDENTS FROM SECTION S, DEPARTMENT D WHERE D.DEPT_ID=S.DEPT_ID AND D.COLLEGE_NAME="+"\'"+currentCollege+"\'"+"AND DEPT_NAME="+"\'"+dept+"\'")
+   deptid=data['deptid']   
+   dept=c.execute("SELECT S.SECTION_ID,S.SECTION_NAME,S.NO_OF_SUBJECTS,S.NO_OF_STUDENTS FROM SECTION S WHERE S.ID="+"\'"+deptid+"\'")
    dept=dept.fetchall()
    conn.close()
-   print(dept)
    return {"sections":dept}
 
 @app.route('/setSection',methods=['POST'])
@@ -169,7 +176,7 @@ def setSection():
    no_of_subjects=data['no_of_subjects']
    no_of_students=data['no_of_students']
    section_id=data['section_id']
-   queryAddSection=c.execute("INSERT INTO SECTION VALUES("+"\'"+section_id+"\'"+"\'"+section_name+"\'"+"\'"+no_of_subjects+"\'"+"\'"+no_of_students+"\'"+"\'"+dept_id+"\'"+")")
+   c.execute("INSERT INTO SECTION VALUES("+"\'"+section_id+"\'"+"\'"+section_name+"\'"+"\'"+no_of_subjects+"\'"+"\'"+no_of_students+"\'"+"\'"+dept_id+"\'"+")")
    conn.commit()
    conn.close()
    conn.close()
@@ -180,9 +187,7 @@ def getSectionTable():
    c=conn.cursor()
    data=request.json
    sec_id=data['secId']
-   dept=data['dept']
-   print(sec_id)
-   material=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION,M.TYPE,F.NAME, M.SUBJECT_NAME,D.DEPT_NAME, M.DATE_ADDED FROM MATERIAL M,FACULTY F,SECTION S,DEPARTMENT D WHERE F.MAIL_ID=M.FACULTY_MAIL_ID AND F.DEPT_ID=S.DEPT_ID AND M.SECTION_ID="+"\'"+sec_id+"\'AND D.DEPT_NAME="+"\'"+dept+"\'AND D.COLLEGE_NAME="+"\'"+currentCollege+"\'")
+   material=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION,M.TYPE,F.NAME,S.NAME,D.NAME,M.DATE_ADDED FROM MATERIAL M,FACULTY F,SUBJECT S WHERE M.SUBID=S.ID AND S.EMAIL=F.EMAIL AND S.SEC_ID="+"\'"+sec_id+"\'")   
    material=material.fetchall()   
    conn.close()
    return {"material":material}
@@ -191,13 +196,17 @@ def getSectionTable():
 def getTeacherDetails():
    conn=sqlite3.connect('Webiclass.db')     
    c=conn.cursor()
-   details=c.execute("SELECT F.NAME,D.DEPT_NAME,F.ROLE FROM DEPARTMENT D, FACULTY F WHERE D.DEPT_ID=F.DEPT_ID AND F.MAIL_ID="+"\'"+currentUser+"\'")
-   details=details.fetchall()
-   print(currentUser)
-   materials=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION, M.TYPE,F.NAME, M.SUBJECT_NAME,D.DEPT_NAME, M.DATE_ADDED FROM MATERIAL M,FACULTY F, DEPARTMENT D WHERE F.MAIL_ID=M.FACULTY_MAIL_ID AND D.DEPT_ID=F.DEPT_ID AND M.FACULTY_MAIL_ID="+"\'"+currentUser+"\'")
-   materials=materials.fetchall()
+   data=request.json
+   deptid=data['deptid']
+   email=data['email']
+   name=c.execute("SELECT NAME FROM FACULTY WHERE EMAIL="+"\'"+email+"\'"+" UNION SELECT NAME FROM STUDENT WHERE EMAIL="+"\'"+email+"\'"+" UNION SELECT NAME FROM ADMINDEPT WHERE EMAIL"="\'"+email+"\'")
+   name=name.fetchall()
+   deptname=c.execute("SELECT NAME FROM DEPARTMENT WHERE ID="+"\'"+deptid+"\'")
+   deptname=deptname.fetchall()
+   material=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION,M.TYPE,F.NAME,S.NAME,D.NAME,M.DATE_ADDED FROM MATERIAL M,FACULTY F,SUBJECT S WHERE M.SUBID=S.ID AND S.EMAIL=F.EMAIL AND S.EMAIL="+"\'"+email+"\'")   
+   materials=material.fetchall()
    conn.close()
-   return {"details":details,"material":materials}
+   return {"name":name,"deptname":deptname,"material":materials}
   
 @app.route('/addMaterial',methods=['POST'])
 def addMaterial():
@@ -206,7 +215,7 @@ def addMaterial():
    data=request.json
    material=data['material']
    print(material)
-   c.execute("INSERT INTO MATERIAL VALUES("+"\'"+material["link"]+"\'"+","+"\'"+currentCollege+"\'"+","+"\'"+material["types"]+"\'"+","+"\'"+material["date"]+"\'"+","+"\'"+material["subject"]+"\'"+","+"\'"+material["secId"]+"\'"+","+"\'"+material["facultyMailId"]+"\'"+","+"\'"+material['desc']+"\')")
+   c.execute("INSERT INTO MATERIAL VALUES("+"\'"+material["link"]+"\'"+","+"\'"+material["desc"]+"\'"+","+"\'"+material["types"]+"\'"+","+"\'"+material["date"]+"\'"+","+"\'"+material["subject_id"]+"\')")
    conn.commit()   
    conn.close()
    return {"status":"success"}
@@ -216,9 +225,8 @@ def addSection():
    conn=sqlite3.connect('Webiclass.db')     
    c=conn.cursor()
    data=request.json
-   link=data['class']
-   print(link)
-   c.execute("INSERT INTO SECTION VALUES("+"\'"+link)
+   section=data['section']
+   c.execute("INSERT INTO SECTION VALUES("+"\'"+section["secId"]+"\'"+","+"\'"+section["name"]+"\'"+","+"\'"+section["no_of_subjects"]+"\'"+","+"\'"+section["no_of_students"]+"\'"+","+"\'"+section["deptId"]+"\')")
    conn.commit()   
    conn.close()
    return {"status":"success"}
@@ -235,37 +243,100 @@ def deleteMaterial():
    conn.close()
    return {"status":"success"}
 
-@app.route('/sortByType',methods=['POST'])
-def sortType():
+@app.route('/updateProfile',methods=['POST'])
+def updateProfile():
    conn=sqlite3.connect('Webiclass.db')     
    c=conn.cursor()
-   queryType="SELECT * FROM MATERIAL ORDER BY TYPE"
-   sortedType=c.execute(queryType)
-   sortedType=sortedType.fetchall()
+   data=request.json
+   prevEmail=data['prevEmail']
+   newEmail=data['newEmail']
+   name=data['name']
+   c.execute("UPDATE CREDENTIALS SET EMAIL="+"\'"+newEmail+"\'"+"WHERE EMAIL="+"\'"+prevEmail+"\'")
+   conn.commit()
+   c.execute("UPDATE FACULTY SET NAME="+"\'"+name+"\'"+" WHERE EMAIL="+"\'"+newEmail+"\'")
+   conn.commit()
+   c.execute("UPDATE ADMINCOLLEGE NAME="+"\'"+name+"\'"+" WHERE EMAIL="+"\'"+newEmail+"\'")
+   conn.commit()   
+   c.execute("UPDATE ADMINDEPT SET NAME="+"\'"+name+"\'"+" WHERE EMAIL="+"\'"+newEmail+"\'")
+   conn.commit()
+   c.execute("UPDATE STUDENT SET NAME="+"\'"+name+"\'"+"WHERE EMAIL="+"\'"+newEmail+"\'")   
+   conn.commit()
    conn.close()
-   return {"sortedType":sortedType}
+   return {"status":"success"}
 
-@app.route('/sortBySub',methods=['POST'])
-def sortSub():
-     conn=sqlite3.connect('Webiclass.db')   
-     c=conn.cursor()
-     querySub="SELECT * FROM MATERIAL ORDER BY SUBJECT_NAME"
-     sortedSub=c.execute(querySub)
-     sortedSub=sortedSub.fetchall()
-     conn.close()
-     return {"sortedSub":sortedSub}
+@app.route("/addAttendance")
+def addAttendance():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   attendance=data["attendance"]
+   id=data["id"]
+   subid=data["subid"]
+   for i in len(attendance):
+      c.execute("INSERT INTO PRESENCE VALUES("+"\'"+id+"\'"+","+"\'"+attendance[i]["date"]+"\'"+","+"\'"+attendance[i]["time"]+"\'"+","+"\'"+subid+"\'"+","+"\'"+attendance[i]["usn"]+"\'"+","+"\'"+attendance[i]["status"]+"\')")
+      conn.commit()
+   return {"status":"success"}      
+
+@app.route("/getAttendance")
+def addAttendance():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   attendance=data["usn"]
+   attendanceList=c.execute("SELECT * FROM ATTENDANCE WHERE USN="+"\'"+usn+"\'")
+   attendanceList=attendanceList.fetchall()
+   return {"list":attendanceList}      
+
+@app.route("/addProfessor")
+def addProfessor():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   profs=data["profs"]
+   hod=data["hod"]
+   id=data["id"]
+   for i in len(profs):
+      c.execute("INSERT INTO FACULTY VALUES("+"\'"+profs[i]["email"]+"\'"+","+"\'"+profs[i]["name"]+"\'"+","+"\'"+hod+"\'"+","+"\'"+id+"\')")
+      conn.commit()
+   return {"status":"Success"}
+
+@app.route("/removeProfessor")
+def removeProfessor():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   profs=data["profs"]
+   hod=data["hod"]
+   id=data["id"]
+   for i in len(profs):
+      c.execute("DELETE FROM FACULTY WHERE EMAIL="+"\'"+profs[i]["email"]+"\'")
+      conn.commit()
+   return {"status":"Success"}
+
+@app.route("/addStudent")
+def addStudent():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   student=data["student"]
+   id=data["id"]
+   for i in len(student):
+      c.execute("INSERT INTO STUDENT VALUES("+"\'"+student[i]["email"]+"\'"+","+"\'"+student[i]["usn"]+"\'"+","+"\'"+student[i]["name"]+"\'"+","+"\'"+id+"\')")
+      conn.commit()
+   return {"status":"Success"}
+
+@app.route("/removeStudent")
+def removeStudent():
+   conn=sqlite3.connect('Webiclass.db')     
+   c=conn.cursor()
+   data=request.json
+   student=data["student"]
+   id=data["id"]
+   for i in len(profs):
+      c.execute("DELETE FROM STUDENT WHERE EMAIL="+"\'"+student[i]["email"]+"\'")
+      conn.commit()
+   return {"status":"Success"}
 
 @app.route("/getMailId")
 def getMail():
     return {"mail":currentUser,"college":currentCollege}
-
-@app.route('/sortByDept',methods=['POST'])
-def sortDept():
-     conn=sqlite3.connect('Webiclass.db')   
-     c=conn.cursor()
-     queryDept="SELECT * FROM DEPARTMENT ORDER BY DEPT_NAME"
-     sortedDept=c.execute(queryDept)
-     sortedDept=sortedDept.fetchall()
-     conn.close()     
-     return {sortedDept}
-
