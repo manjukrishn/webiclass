@@ -41,12 +41,23 @@ export default function Login() {
 
   function errorLogging(value,role){
        if(value==="Success"){
-        if(role==="ADMIN")
+         sessionStorage.setItem("isLoggedin", true);
+         if(role==="ADMINCOLLEGE")
+         sessionStorage.setItem("isAdminCollege", true);
+         else if(role==="ADMINMAIN")
+         sessionStorage.setItem("isAdminMain", true);
+         else if(role==="FACULTY")
+         sessionStorage.setItem("isFaculty", true);
+         else if (role==="ADMINDEPT")
+         sessionStorage.setItem("isAdminDept", true);
+         else if (role==="HOD")
+         sessionStorage.setItem("isHod", true);
+        if(role==="ADMINCOLLEGE"){
           history.push('/admin-college');
-        else if(role==="ADMIN MAIN")
+        }
+        else if(role==="ADMINMAIN")
           history.push('/admin-main');
-        else
-          history.push('/home');
+        history.push('/home');
         setError({
           invalidEmail:false,
           invalidPassword:false

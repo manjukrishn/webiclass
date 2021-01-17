@@ -11,14 +11,14 @@ import PrivateRoute from "./components/PrivateRoute";
 import Dept from "./components/Department";
 import PageNotFound from "./components/PageNotFound";
 import { Route } from "react-router-dom";
-import AdminCollege from "./components/AdminCollege";
+import AdminMainAdminDept from "./components/AdminMainAdminDpt";
 import Loading from "./components/Loading";
 import AdminMain from "./components/AdminMain";
+import AdminMainDept from "./components/AdminMainDpt";
 import Sidebar from "./components/Sidebar";
 import {
   isAdminMain,
   isAdminCollege,
-  isTeacher,
   isHod
 } from "./components/Util";
 
@@ -29,8 +29,8 @@ export default function App() {
     setLoading(false);
   }
 
-  React.useEffect(()=>{
-    function getList(){
+  React.useEffect(()=>{   
+   function getList(){
     fetch("/getDepartment").then(response=>response.json()).
     then(data=>{
       const arr=[]
@@ -42,7 +42,8 @@ export default function App() {
       setLoad()
     });
   }
-  setTimeout(getList,2000);
+  setLoad()
+  getList()
   },[]);
 
   return (
@@ -55,8 +56,11 @@ export default function App() {
           {isAdminMain() && (
             <PrivateRoute path={"/admin-main"} component={AdminMain} />
           )}
-          {isAdminCollege() && (
-            <PrivateRoute path={"/admin-college"} component={AdminCollege} />
+          {isAdminMain() && (
+            <PrivateRoute path={"/admin-main-dpt"} component={AdminMainDept} />
+          )}
+          {isAdminMain() && (
+            <PrivateRoute path={"/admin-main-admin-dpt"} component={AdminMainAdminDept} />
           )}
           {!loading ?
             <table>
@@ -71,10 +75,8 @@ export default function App() {
                   {dept.map((item, index) => {
                      return <PrivateRoute path={"/"+item} component={Dept} />;
                   })}
-                  
-                  {isTeacher() && (
+              
                     <PrivateRoute path={"/profile"} component={Profile} />
-                  )}
                 </td>
               </tr>
             </table>:<Loading/>}

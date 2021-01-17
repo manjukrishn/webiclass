@@ -9,6 +9,7 @@ import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import Attendance from "./Attendance";
+import {isHod,isAdminDept, isFaculty} from "./Util";
 
 export default function Profileright(props) {
   const [disabled,setDisabled]=React.useState(true);
@@ -100,15 +101,15 @@ export default function Profileright(props) {
         <col style={{ width: "15%" }} />
         <tr>
           <td></td>
-          <td style={{ textAlign: "right" }}>
+          {isHod() && <td style={{ textAlign: "right" }}>
             <AddProfessor />
-          </td>
-          <td style={{ textAlign: "center" }}>
+          </td>}
+          {isHod() && <td style={{ textAlign: "center" }}>
             <RemoveProf/>
-          </td>
-          <td style={{ textAlign: "left" }}>
+          </td>}
+          {isFaculty() && <td style={{ textAlign: "left" }}>
             <Attendance/>
-          </td>
+          </td>}
         </tr>
       </table>
       <table style={{ marginTop: "2%", marginLeft: "5%" }}>

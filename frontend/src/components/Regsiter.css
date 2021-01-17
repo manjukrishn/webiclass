@@ -5,11 +5,13 @@
   background-color: #f6f8ff;
 }
 .register-container {
-  width: 20%; /* Can be in percentage also. */
+  width: 30%; /* Can be in percentage also. */
   height: auto;
   position: absolute;
   left: 50%;
   top: 50%;
+  height:500px;
+  overflow:auto;
   transform: translate(-50%, -50%);
 }
 
@@ -35,4 +37,15 @@
 .register-login:hover {
   color: black;
   text-decoration: underline;
+}
+.register-container::-webkit-scrollbar {
+  background-color: white;
+  width: 10px;
+}
+.register-container::-webkit-scrollbar-thumb {
+  background-color: lightgrey;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: padding-box;
+  width: 5px;
 }

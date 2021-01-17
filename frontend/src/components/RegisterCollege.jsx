@@ -44,6 +44,18 @@ export default function Register() {
       };
     });
   }
+  function handleClick(){
+    if(credentials.admin){
+      fetch("/register-college",{
+        method:"POST",
+        cache:"no-cache",
+        headers:{
+          "content_type":"application/json",
+        },
+        body:JSON.stringify({credentials:credentials})
+       }).then(response=>response.json()).then(data=>{console.log(data);});
+    }
+  }
   return (
     <div className="register-body">
       <div className="register-container">
@@ -68,6 +80,7 @@ export default function Register() {
         {!!credentials.admin && (
           <TextField
             value={str + credentials.admin}
+          className="register-email"
             label={
               <span style={{ fontFamily: '"Nunito", sans-serif' }}>
                 College admin
@@ -80,7 +93,7 @@ export default function Register() {
             style={{ marginTop: "20px" }}
           />
         )}
-        <div style={{ width: "85%", marginLeft: "7.5%", marginTop: "50px" }}>
+        <div style={{ width: "85%", marginLeft: "7.5%", marginTop: "50px" }} onClick={handleClick}>
           <Submit disabled={disabled} validate={validate} />
         </div>
         <div

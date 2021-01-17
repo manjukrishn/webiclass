@@ -2,7 +2,6 @@ import React from "react";
 import Table from "./DescTable";
 import Collegelogo from "./Collegelogo";
 export default function Homeright(props) {
-  console.log(props.materials+"mdkmfsdkmdsf");
  return (
     <div
       style={{
@@ -16,7 +15,7 @@ export default function Homeright(props) {
       <table style={{ marginTop: "3%" }}>
         <tr>
           <td>
-            <Collegelogo />
+            <Collegelogo image={props.logo} />
           </td>
           <td style={{ paddingLeft: "35px", color: "#bc6ff1" }}>
             <h1
@@ -27,7 +26,8 @@ export default function Homeright(props) {
                 alignItem: "center",
                 color: "#474f85"
               }}
-            >{props.logged}
+            >
+            Sahyadri College of Engineering and Managment
             </h1>
           </td>
         </tr>

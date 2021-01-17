@@ -1,6 +1,11 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
 import InputBase from "@material-ui/core/InputBase";
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import Typography from "@material-ui/core/Typography";
 import Tooltip from "@material-ui/core/Tooltip";
 import CloseIcon from "@material-ui/icons/Close";
@@ -27,7 +32,11 @@ const useStyles = makeStyles((theme) => ({
   },
   margin: {
     margin: theme.spacing(1)
-  }
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -37,17 +46,34 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function FullScreenDialog(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [subid,setSubjectId]=React.useState();
+  
   const [addMaterial,setAddMaterial]=React.useState({
     facultyMailId:null,
     date:null,
     link:null,
-    subject:null,
+    subid:subid,
     type:"Notes",
     desc:null,
     secId:null,
     collegeName:null
-  })
+  });
+  const [handledSubjects,setHandledSubject]=React.useState([]);
+  const [subject,setSubject]=React.useState();
   React.useEffect(()=>{
+    fetch("/getHandledSubjects",{
+      method:"POST",
+      cache:"no-cache",
+      headers:{
+        "content_type":"application/json",
+      },
+      body:JSON.stringify({secId:props.secId})
+     }).then(response=>response.json()).then
+    (data=>{
+       console.log(data.subjects);
+      setHandledSubject(data.subjects);
+    });
+
     fetch("/getMailId").then(response=>response.json()).then
     (data=>{
       setAddMaterial({facultyMailId:data.mail,date:getDate(),collegeName:data.currentCollege,secId:props.secId,types:"Notes"})
@@ -56,10 +82,20 @@ export default function FullScreenDialog(props) {
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
+  const handleChangeOption =(e)=>{
+     setSubject(e.target.value);
+     handledSubjects.map((item,index)=>{
+       if(item[0]===e.target.value){
+         setSubjectId(item[1]);
+         addMaterial.subid=item[1];
+         console.log(item[1]);
+         return null;
+       }
+     })
+  }
   const handleSave=()=>{
     const arr=[];
     fetch("/addMaterial",{
@@ -163,16 +199,24 @@ export default function FullScreenDialog(props) {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText
+          <ListItemText
               primary="Subject"
               secondary={
-                <InputBase
-                  name="subject"
-                  style={{ width: "100%" }}
-                  placeholder="Associated Subject"
-                  onChange={handleChange}
-                  value={addMaterial.subject}
-                />
+             <FormControl className={classes.formControl}>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={subject}
+                onChange={handleChangeOption}
+              >{
+                handledSubjects.map((item,index)=>{
+                  return(
+                   <MenuItem value={item[0]}>{item[0]}</MenuItem>
+                  );
+                })
+              }
+               </Select>
+            </FormControl>
               }
             />
           </ListItem>

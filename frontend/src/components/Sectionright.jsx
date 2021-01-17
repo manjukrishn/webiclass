@@ -2,6 +2,7 @@ import React from "react";
 import Table from "./DescTable";
 import Tooltip from "@material-ui/core/Tooltip";
 import AddMaterial from "./AddMaterial";
+import {isHod,isFaculty} from "./Util";
 
 export default function Secright(props) {
   const [materials,setMaterials]=React.useState([]);
@@ -14,7 +15,7 @@ export default function Secright(props) {
       headers:{
         "content_type":"application/json",
       },
-      body:JSON.stringify({secId:props.secId,dept:props.dept})
+      body:JSON.stringify({secId:props.secId})
      }).then(response=>response.json()).then(
     data=>{
     const arr=[]
@@ -72,10 +73,11 @@ function setFlag(e){
             >
               {"Section " + props.heading}
             </h1>
-          </td>
+          </td>{
+             isFaculty() && 
           <td>
             <AddMaterial secId={props.secId} flag={setFlag}/>
-          </td>
+          </td>}
         </tr>
       </table>
       <div

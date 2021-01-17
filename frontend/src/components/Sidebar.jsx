@@ -1,6 +1,5 @@
 import React from "react";
 import "./Sidebar.css";
-import { isAdmin } from "./Util";
 import { Link } from "react-router-dom";
 import HomeIcon from "@material-ui/icons/Home";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
@@ -9,6 +8,7 @@ import { useLocation, Switch } from 'react-router-dom';
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 export default function Sidebar(props) {
   const location=useLocation();
+  
   React.useEffect(() => {
     const cls = "style-onhover";
     const str = window.location.pathname.split("/");
@@ -60,6 +60,7 @@ export default function Sidebar(props) {
               <span style={{ position: "absolute" }}>College</span>
             </Link>
           </li>
+         {!! props.dept &&
           <ul className="sidebar-sublist" style={{ marginTop: "3%" }}>
             <table
               style={{
@@ -93,14 +94,12 @@ export default function Sidebar(props) {
                 );
               })}
             </table>
-          </ul>
+          </ul>}
           <li tabindex="2" id="profile" style={{ marginTop: "8%" }}>
-            {isAdmin() && (
               <Link to="profile">
                 <PersonPinIcon className="img-sidebar" />
                 <span style={{ position: "absolute" }}>Profile</span>
               </Link>
-            )}
           </li>
         </ul>
       </div>

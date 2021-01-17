@@ -7,9 +7,11 @@ export default function Register() {
   const history = useHistory();
   const [credentials, setCredentials] = React.useState({
     email: "",
-    college:"",
+    uid:"",
+    name:"",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    did:""
   });
   const [disabled, setDisabled] = React.useState(true);
   const [error,setError]=React.useState({invalidEmail:false});
@@ -35,6 +37,7 @@ export default function Register() {
       setInvalidPassword(false);
     }
   }, [credentials]);
+
   function handleChange(e) {
     const { name, value } = e.target;
     if(error.invalidEmail){
@@ -100,11 +103,26 @@ export default function Register() {
             style: { fontFamily: '"Nunito", sans-serif' }
           }}
         />}
-        <TextField
-          name="college"
-          value={credentials.college}
+
+         <TextField
+          name="name"
+          value={credentials.name}
           label={
-            <span style={{ fontFamily: '"Nunito", sans-serif' }}>College Name</span>
+            <span style={{ fontFamily: '"Nunito", sans-serif' }}>Your Name</span>
+          }
+          onChange={handleChange}
+          className="register-password"
+          style={{marginTop:"20px"}}
+          inputProps={{
+            min: 0,
+            style: { fontFamily: '"Nunito", sans-serif' }
+          }}
+        />
+        <TextField
+          name="uid"
+          value={credentials.uid}
+          label={
+            <span style={{ fontFamily: '"Nunito", sans-serif' }}>UID</span>
           }
           onChange={handleChange}
           className="register-password"

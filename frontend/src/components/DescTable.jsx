@@ -7,10 +7,27 @@ import SubjectIcon from "@material-ui/icons/Subject";
 import IconButton from "@material-ui/core/IconButton";
 import DynamicFeedRoundedIcon from "@material-ui/icons/DynamicFeedRounded";
 import AssignmentIndRoundedIcon from "@material-ui/icons/AssignmentIndRounded";
+import Nothing from "./NothingShow";
+import {isFaculty,isHod} from "./Util";
 export default function DescTable(props) {
+  const [material,setMaterials]=React.useState(props.contents);
 
-  let paddingLeft = "5%";
-  const width =
+  function groupBy(list, keyGetter) {
+    const map = new Map();
+    list.forEach((item) => {
+         const key = keyGetter(item);
+         const collection = map.get(key);
+         if (!collection) {
+             map.set(key, [item]);
+         } else {
+             collection.push(item);
+         }
+    });
+    return map;
+}
+
+let paddingLeft = "5%";
+const width =
     window.innerWidth ||
     document.documentElement.clientWidth ||
     document.body.clientWidth;
@@ -20,7 +37,7 @@ export default function DescTable(props) {
     const newWindow=window.open(url,"_blank","noopener,noreferrer");
     if(newWindow) newWindow.opener=null;
   }
-  const handleDelete=(e)=>{
+const handleDelete=(e)=>{
     props.setFlag(true)
     fetch("/deleteMaterial",{
       method:"POST",
@@ -31,8 +48,9 @@ export default function DescTable(props) {
       body:JSON.stringify({link:e})
      }).then(response=>response.json()).then(data=>{console.log(data)});
   }
-  return (
+return (
     <div style={{ backgroundColor: "#f2f2f0" }}>
+  {!!material.length ? 
       <table className="desc-table">
         <caption
           style={{
@@ -66,7 +84,7 @@ export default function DescTable(props) {
                 <th></th>
                 <th>
                   <Tooltip title="Sort by date">
-                    <IconButton style={{ marginRight: "20px" }}>
+                    <IconButton style={{ marginRight: "20px" }} onClick={()=>{setMaterials(groupBy(material,material=>material.date_added))}}>
                       <EventNoteIcon style={{ color: "#ee6f57" }} />
                     </IconButton>
                   </Tooltip>
@@ -75,7 +93,7 @@ export default function DescTable(props) {
                 </th>
                 <th>
                   <Tooltip title="Sort by type">
-                    <IconButton style={{ marginRight: "20px" }}>
+                    <IconButton style={{ marginRight: "20px" }} onClick={()=>{setMaterials(groupBy(material,material=>material.type))}}>
                       <DynamicFeedRoundedIcon style={{ color: "#ee6f57" }} />
                     </IconButton>
                   </Tooltip>
@@ -85,7 +103,7 @@ export default function DescTable(props) {
                 {props.type == "home" && (
                   <th>
                     <Tooltip title="Sort by department">
-                      <IconButton style={{ marginRight: "20px" }}>
+                      <IconButton style={{ marginRight: "20px" }} onClick={()=>{setMaterials(groupBy(material,material=>material.dept))}}>
                         {
                           <AssignmentIndRoundedIcon
                             style={{ color: "#f05454" }}
@@ -98,7 +116,7 @@ export default function DescTable(props) {
                 )}
                 <th style={{ paddingRight: "25px" }}>
                   <Tooltip title="Sort by subject">
-                    <IconButton helperText="Hel">
+                    <IconButton helperText="Hel" onClick={()=>{setMaterials(groupBy(material,material=>material.subject))}}>
                       <SubjectIcon style={{ color: "#f05454" }} />
                       {/* sort by subject */}
                     </IconButton>
@@ -127,7 +145,7 @@ export default function DescTable(props) {
           </tr>
         </thead>
         <tbody>
-          {props.contents.map((item, index) => {
+          {material.map((item, index) => {
             return (
               <tr className="desc-table-tr" onClick={()=>openNewTab(item.link)}>
                 <td
@@ -162,7 +180,7 @@ export default function DescTable(props) {
                   }}
                 >
                 {item.date_added}
-                  {props.type == "profile" && (
+                  {isHod() || isFaculty() && (
                     <div
                       style={{
                         width: "1%",
@@ -227,7 +245,7 @@ export default function DescTable(props) {
                 >20 Dec 2020</td>
               </tr>
         </tbody>
-      </table>
+      </table> : <Nothing/>}
     </div>
   );
 }
