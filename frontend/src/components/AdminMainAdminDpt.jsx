@@ -27,6 +27,14 @@ export default function AdminMain() {
   const [error,setError]=React.useState({invalidEmail:false});
   const [dept,setDept]=React.useState([]);
 
+  React.useEffect(()=>{
+    fetch('/getDepartmentListAdminMain').then(res=>{
+      return res.json()
+   }).then(json=>{
+     setDept(json.dept);
+   })
+  },[]);
+  
   React.useEffect(() => {
     const res = () => {
       const mailFormat = /^([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{2,4})+)*$/;

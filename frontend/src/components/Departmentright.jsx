@@ -94,12 +94,12 @@ function Dept(prop) {
                 color: "#474f85"
               }}
             >
-              {getDept()}
+              {prop.dept}
             </h1>
           </td>{
             isAdminDept() && 
           <td>
-            <AddClass />
+            <AddClass dept={prop.dept}/>
           </td>}
         </tr>
       </table>

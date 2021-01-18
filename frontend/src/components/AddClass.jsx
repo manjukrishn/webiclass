@@ -20,7 +20,8 @@ function ConfirmationDialogRaw(props) {
   const [sectionValues,setSectionValues]=React.useState({
     section:"",
     no_of_subjects:0,
-    no_of_students:0
+    no_of_students:0,
+    sectionId:""
   }) 
   React.useEffect(() => {
     if (!open) {
@@ -36,9 +37,18 @@ function ConfirmationDialogRaw(props) {
 
   const handleCancel = () => {
     onClose();
+    setSectionValues({
+      section:"",
+      no_of_subjects:0,
+      no_of_students:0,
+      sectionId:""
+    });
   };
 
   const handleOk = () => {
+    sectionValues.sectionId=props.dept+" "+sectionValues.section;
+    sectionValues.dept=props.dept;
+    
     fetch("/addSection",{
       method:"POST",
       cache:"no-cache",
@@ -105,6 +115,7 @@ function ConfirmationDialogRaw(props) {
             </td>
             <td style={{ paddingLeft: "15px", paddingTop: "20px" }}>
               <TextField
+                disabled={true}
                 style={{ width: "60px" }}
                 inputProps={{
                   min: 0,
@@ -135,6 +146,7 @@ function ConfirmationDialogRaw(props) {
             </td>
             <td style={{ paddingLeft: "20px", paddingTop: "20px" }}>
               <TextField
+                disabled={true}
                 name="no_of_subjects"
                 style={{ width: "60px" }}
                 inputProps={{
@@ -177,7 +189,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function ConfirmationDialog() {
+export default function ConfirmationDialog(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("Dione");
@@ -218,6 +230,7 @@ export default function ConfirmationDialog() {
           open={open}
           onClose={handleClose}
           value={value}
+          dept={props.dept}
         />
       </List>
     </div>

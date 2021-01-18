@@ -15,8 +15,6 @@ export default function Sidebar(props) {
     console.log(str);
     let element=document.getElementById("home");
     element.className-=" "+cls;
-    element=document.getElementById("colleges");
-    element.className-=" "+cls;
     element=document.getElementById("profile");
     element.className-=" "+cls;
     if (
@@ -52,12 +50,6 @@ export default function Sidebar(props) {
             <Link to="home">
               <HomeIcon className="img-sidebar" />
               <span style={{ position: "absolute" }}>Home</span>
-            </Link>
-          </li>
-          <li tabindex="1" id="colleges" style={{ marginTop: "5%" }}>
-            <Link to="colleges">
-              <SchoolIcon className="img-sidebar" />
-              <span style={{ position: "absolute" }}>College</span>
             </Link>
           </li>
          {!! props.dept &&

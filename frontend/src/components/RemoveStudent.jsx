@@ -10,7 +10,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
-import RemoveDialog from "./RemoveDialog";
+import RemoveDialog from "./RemoveDialogStudent";
 function ConfirmationDialogRaw(props) {
   const DarkerDisabledTextField = withStyles({
     root: {
@@ -49,7 +49,14 @@ function ConfirmationDialogRaw(props) {
       setValue(valueProp);
     }
   }, [valueProp, open]);
-
+  
+  React.useEffect(()=>{
+    fetch('/getDepartmentListAdminMain').then(res=>{
+        return res.json()
+     }).then(json=>{
+       setArr(json.studentList);
+     })
+  },[])
   const handleEntering = () => {
     if (radioGroupRef.current != null) {
       radioGroupRef.current.focus();
@@ -68,6 +75,23 @@ function ConfirmationDialogRaw(props) {
     if (response) {
       setArr(arr.filter((item) => item.prof_uid !== uid));
     }
+    const cred={
+      studentusn:uid
+    }
+    fetch("/removeStudent", {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+       body:JSON.stringify(cred)
+      }
+    ).then(response => {
+    return response.json()
+   })
+   .then(json => {
+      console.log(json.status); 
+   })
   };
   return (
     <div>
@@ -142,9 +166,6 @@ function ConfirmationDialogRaw(props) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
           <Button onClick={handleOk} color="primary">
             Ok
           </Button>
@@ -189,15 +210,7 @@ export default function ConfirmationDialog() {
 
   return (
     <div className={classes.root}>
-      <IconButton onClick={handleClickListItem}>
-        <RemoveCircleIcon
-          style={{
-            fontSize: "25px",
-            marginLeft: "10%",
-            color: "#cd5d7d"
-          }}
-        />
-      </IconButton>
+      <Button onClick={handleClickListItem} variant="contained" style={{height:"35px",borderRadius:"25px",marginBottom:"15px",boxShadow:"none"}}>Student List</Button>   
       <ConfirmationDialogRaw
         classes={{
           paper: classes.paper

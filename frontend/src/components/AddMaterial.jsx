@@ -49,14 +49,12 @@ export default function FullScreenDialog(props) {
   const [subid,setSubjectId]=React.useState();
   
   const [addMaterial,setAddMaterial]=React.useState({
-    facultyMailId:null,
     date:null,
     link:null,
     subid:subid,
     type:"Notes",
     desc:null,
-    secId:null,
-    collegeName:null
+    secId:props.secId
   });
   const [handledSubjects,setHandledSubject]=React.useState([]);
   const [subject,setSubject]=React.useState();
@@ -73,11 +71,7 @@ export default function FullScreenDialog(props) {
        console.log(data.subjects);
       setHandledSubject(data.subjects);
     });
-
-    fetch("/getMailId").then(response=>response.json()).then
-    (data=>{
-      setAddMaterial({facultyMailId:data.mail,date:getDate(),collegeName:data.currentCollege,secId:props.secId,types:"Notes"})
- });
+   
 },[]);
   const handleClickOpen = () => {
     setOpen(true);

@@ -28,8 +28,9 @@ export default function Profile() {
           date_added:item[6]
         }));
         setMaterial(arr);
-        setTimeout(setLoad,2000);
   });
+  setTimeout(setLoad,2000);
+
   },[flag]);
   function setFlag(e){
       setFla(e);

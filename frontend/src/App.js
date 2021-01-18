@@ -12,9 +12,11 @@ import Dept from "./components/Department";
 import PageNotFound from "./components/PageNotFound";
 import { Route } from "react-router-dom";
 import AdminMainAdminDept from "./components/AdminMainAdminDpt";
+import AdminDeptAssign from "./components/AdminDeptAssign"
 import Loading from "./components/Loading";
 import AdminMain from "./components/AdminMain";
 import AdminMainDept from "./components/AdminMainDpt";
+import AdminDept from "./components/AdminDept";
 import Sidebar from "./components/Sidebar";
 import {
   isAdminMain,
@@ -62,6 +64,12 @@ export default function App() {
           {isAdminMain() && (
             <PrivateRoute path={"/admin-main-admin-dpt"} component={AdminMainAdminDept} />
           )}
+          {isAdminMain() && (
+            <PrivateRoute path={"/admin-dpt"} component={AdminDept} />
+          )}
+          {isAdminMain() && (
+            <PrivateRoute path={"/admin-dpt-assign"} component={AdminDeptAssign} />
+          )}
           {!loading ?
             <table>
               <tr>
@@ -71,7 +79,6 @@ export default function App() {
                 <td colspan="15">
                   <PrivateRoute path={"/"} exact={true} component={Home} />
                   <PrivateRoute path={"/home"} component={Home}/>
-                  <PrivateRoute path={"/colleges"} component={College} />
                   {dept.map((item, index) => {
                      return <PrivateRoute path={"/"+item} component={Dept} />;
                   })}

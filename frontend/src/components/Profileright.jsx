@@ -24,10 +24,16 @@ export default function Profileright(props) {
     }
   })(TextField);
   
+  // const [values,setValues]=React.useState({
+  //   name:props.details.name.charAt(0).toUpperCase()+props.details.name.slice(1).toLowerCase(),
+  //   newEmail:props.details.email,
+  //   prevEmail:props.details.email
+  // })
+
   const [values,setValues]=React.useState({
-    name:props.details.name.charAt(0).toUpperCase()+props.details.name.slice(1).toLowerCase(),
-    newEmail:props.details.email,
-    prevEmail:props.details.email
+    name:"",
+    newEmail:"",
+    prevEmail:""
   })
 
   const validate = (email) => {
