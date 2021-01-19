@@ -2,7 +2,7 @@ import React from "react";
 import "./AdminMain.css";
 import TextField from "@material-ui/core/TextField";
 import { useHistory } from "react-router-dom";
-import Submit from "./SubmitAdminMain";
+import Submit from "./SubmitAdminMainAdminDpt";
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
@@ -13,10 +13,21 @@ export default function AdminMain() {
   const history = useHistory();
 
   const [department, setDepartment] = React.useState('');
-
+  const [reqdept,setReqDept]=React.useState('');
   const handleChangeList = (event) => {
-    setDepartment(event.target.value);
+    console.log(event.target.value);
+    const arr=event.target.value;
+    console.log(arr[0]);
+    setDepartment(arr);
+    const name="admindept";
+    setCredentials((prev)=>{
+      return {
+        ...prev,
+        [name]:arr[0]
+      }
+    });
   };
+
   const [credentials, setCredentials] = React.useState({
     adminemail: "",
     adminname:"",
@@ -44,8 +55,12 @@ export default function AdminMain() {
     };
     const fans = res();
     setDisabled(true);
-    if(credentials.hodname && credentials.dept && credentials.hodemail && !fans)
-    setDisabled(false);
+    console.log(credentials);
+    if(credentials.adminname && credentials.admindept && credentials.adminemail && !fans && credentials.adminuid)
+    {
+      
+      setDisabled(false);
+    }
   }, [credentials]);
 
   function handleChange(e) {
@@ -69,8 +84,7 @@ export default function AdminMain() {
        setError({
          invalidEmail:false
        });
-     
-     history.push('/login');
+
     }
     else if(value==="Email Already exist"){
        setError({
@@ -156,7 +170,7 @@ export default function AdminMain() {
         >
           {dept.map((item,index)=>{
             return(
-              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={item}>{item}</MenuItem>
             )
           })}
         </Select>
@@ -177,7 +191,7 @@ export default function AdminMain() {
         </div>
         <div
           onClick={() => {
-            history.push("/admin-main-admin-dpt");
+            history.push("/admin-main-dpt");
           }}
           className="admin-main-go-home"
           style={{ marginTop: "20px",cursor:"pointer" }}

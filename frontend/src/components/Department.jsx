@@ -33,9 +33,19 @@ export default function Dept({ routes }) {
     }).then(json=>{
       console.log(json.sections);
       const arr=[]
+     
       json.sections.map((item,index)=>{
-        arr.push({section_id:item[0],section_name:item[1],no_of_subjects:item[2],no_of_students:item[3]})
+        arr.push({section_id:item[0],section_name:item[1]})
       });
+      json.no_of_students.map((item,index)=>{
+        for(let i=0;i<arr.length;i++){
+           if(item[0]==arr[i].section_id){
+           arr[i].no_of_students=item[1];
+           arr[i].no_of_subjects=item[2];
+          }
+
+        }
+      })
       console.log(arr);
       setSection(arr);      
     })

@@ -10,8 +10,7 @@ export default function Register() {
     uid:"",
     name:"",
     password: "",
-    confirmPassword: "",
-    did:""
+    confirmPassword: ""
   });
   const [disabled, setDisabled] = React.useState(true);
   const [error,setError]=React.useState({invalidEmail:false});

@@ -54,10 +54,24 @@ export default function FullScreenDialog(props) {
     subid:subid,
     type:"Notes",
     desc:null,
-    secId:props.secId
+    secId:props.secId,
+    uid:"",
+    facultyName:""
   });
   const [handledSubjects,setHandledSubject]=React.useState([]);
   const [subject,setSubject]=React.useState();
+  React.useEffect(()=>{
+    fetch('/getFacultyName').then(response=>response.json()).then
+    (data=>{
+       console.log(data.name);
+       console.log(data.uid)
+       let name="uid"
+       addMaterial.uid=data.uid
+       addMaterial.facultyName=data.name
+      console.log(addMaterial)
+    });
+  },[]);
+  
   React.useEffect(()=>{
     fetch("/getHandledSubjects",{
       method:"POST",
@@ -71,8 +85,7 @@ export default function FullScreenDialog(props) {
        console.log(data.subjects);
       setHandledSubject(data.subjects);
     });
-   
-},[]);
+  },[])
   const handleClickOpen = () => {
     setOpen(true);
   };

@@ -47,7 +47,7 @@ export default function CircularIntegration(props) {
   }, []);
 
   const handleButtonClick = () => {
-    fetch("/addHOD",{
+    fetch("/addAdminDept",{
       method:"POST",
       cache:"no-cache",
       headers:{

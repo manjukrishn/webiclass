@@ -161,9 +161,6 @@ function ConfirmationDialogRaw(props) {
         </table>
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={handleCancel} color="primary">
-          Cancel
-        </Button>
         <Button onClick={handleOk} color="primary">
           Ok
         </Button>

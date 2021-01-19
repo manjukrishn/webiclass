@@ -17,7 +17,6 @@ export default function AdminMain() {
     hodname:"",
     dept:"",
     hoduid:""
-
   });
   const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -82,6 +81,14 @@ export default function AdminMain() {
 
   const handleChangeList = (event) => {
     setDepartment(event.target.value);
+    const arr=event.target.value;
+    const name="dept"
+    setCredentials((prev)=>{
+      return{
+        ...prev,
+        [name]:arr[0]
+      }
+    })
   };
 
   return (
@@ -137,7 +144,7 @@ export default function AdminMain() {
           name="hoduid"
           value={credentials.hoduid}
           label={
-            <span style={{ fontFamily: '"Nunito", sans-serif' }}>HOD </span>
+            <span style={{ fontFamily: '"Nunito", sans-serif' }}>HOD UID </span>
           }
           onChange={handleChange}
           className="register-password"
@@ -158,7 +165,7 @@ export default function AdminMain() {
         >
           {dept.map((item,index)=>{
             return(
-              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={item}>{item}</MenuItem>
             )
           })}
         </Select>

@@ -16,7 +16,7 @@ export default function Profile() {
     fetch("/getProfile").then(response=>response.json()).then
      (data=>{
        const arr=[];
-       setDetails({name:data.details[0][0],dept:data.details[0][1],email:data.details[0][2]})
+       setDetails({name:data.details[0][1],dept:data.details[0][3],email:data.details[0][2]})
         data.material.map((item,index)=>arr.push(
         {
           link:item[0],

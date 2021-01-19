@@ -37,19 +37,18 @@ function ConfirmationDialogRaw(props) {
     ];
     
     const rows = [
-      { id: 1,USN:"4SF18IS001", Name: 'Snow'},
-      { id: 2,USN:"4SF18IS002", Name: 'Lannister' },
-      { id: 3,USN:"4SF18IS003", Name: 'Lannister' },
-      { id: 4,USN:"4SF18IS004", Name: 'Stark' },
-      { id: 5,USN:"4SF18IS005", Name: 'Targaryen' },
-      { id: 6,USN:"4SF18IS006", Name: 'Melisandre' },
-      { id: 7,USN:"4SF18IS007", Name: 'Clifford' },
-      { id: 8,USN:"4SF18IS008", Name: 'Frances' },
-      { id: 9,USN:"4SF18IS009", Name: 'Roxie'}
+      { id: 1,USN:"4SF18IS001", Name: 'Afeel'},
+      { id: 4,USN:"4SF18IS025", Name: 'Dharshan' },
+      { id: 2,USN:"4SF18IS051", Name: 'Manjukrishna' },
+      { id: 3,USN:"4SF18IS053", Name: 'Mayur' }
     ];
     
-    
-
+  const handleDateChange=(e)=>{
+    setDate(e.target.value)
+  }
+  const handleTimeChange=(e)=>{
+    setTime(e.target.value)
+  }
  const useStyles = makeStyles((theme) => ({
    formControl: {
      margin: theme.spacing(1),
@@ -60,16 +59,23 @@ function ConfirmationDialogRaw(props) {
    },
  }));
    const classes = useStyles();
-
+  
+   const [time,setTime]=React.useState('7.30');
+   const [date,setDate]=React.useState('');
    const { onClose, value: valueProp, open, ...other } = props;
    const [value, setValue] = React.useState(valueProp);
    const radioGroupRef = React.useRef(null);
    const [age, setAge] = React.useState('');
- 
-   const handleChange = (event) => {
-     setAge(event.target.value);
+   const [section,setSection]=React.useState('');
+   const [subject,setSubject]=React.useState('');
+
+   const handleChangeSection = (event) => {
+     setSection(event.target.value);
    };
  
+   const handleChangeSubject = (event) => {
+    setSubject(event.target.value);
+  };
    const [arr, setArr] = React.useState([
      {
        prof_email: "abcdefffewefwef@gmail.com",
@@ -93,6 +99,29 @@ function ConfirmationDialogRaw(props) {
      }
    ]);
  
+   React.useEffect(()=>{
+     const cred={
+       section:section,
+       subject:subject,
+       time:time,
+       date:date
+     }
+     fetch("/getStudentList", {
+       method:"POST",
+       cache: "no-cache",
+       headers:{
+           "content_type":"application/json",
+       },
+        body:JSON.stringify({cred:cred})
+       }
+     ).then(response => {
+     return response.json()
+    })
+    .then(json => {  
+       setArr(json.studentList);
+    })
+   },[section]);
+   
    React.useEffect(() => {
      if (!open) {
        setValue(valueProp);
@@ -140,8 +169,8 @@ function ConfirmationDialogRaw(props) {
             <Select
               labelId="demo-simple-select-outlined-label"
               id="demo-simple-select-outlined"
-              value={age}
-              onChange={handleChange}
+              value={section}
+              onChange={handleChangeSection}
               label="Section"
             >
               <MenuItem value="">
@@ -157,8 +186,8 @@ function ConfirmationDialogRaw(props) {
             <Select
               labelId="demo-simple-select-outlined-label"
               id="demo-simple-select-outlined"
-              value={age}
-              onChange={handleChange}
+              value={subject}
+              onChange={handleChangeSubject}
               label="Subject"
             >
               <MenuItem value="">
@@ -174,6 +203,9 @@ function ConfirmationDialogRaw(props) {
                 id="date"
                 label="Date"
                 type="date"
+                name="date"
+                value={date}
+                onChange={handleDateChange}
                 defaultValue={new Date()}
                 className={classes.textField}
                 InputLabelProps={{
@@ -186,6 +218,9 @@ function ConfirmationDialogRaw(props) {
                id="time"
                label="Class Time"
                type="time"
+               name="time"
+                onChange={handleTimeChange}
+               value={time}
                defaultValue="07:30"
                className={classes.textField}
                InputLabelProps={{
@@ -200,14 +235,27 @@ function ConfirmationDialogRaw(props) {
          
          <DialogContent dividers style={{ backgroundColor: "#f2f2f0" }}>
          <div style={{ height: 400, width: '100%' }}>
-             <DataGrid rows={rows} columns={columns} pageSize={5} checkboxSelection />
+             <DataGrid rows={rows} columns={columns} pageSize={5} checkboxSelection onSelectionChange={(newSelection) => {
+              
+             fetch("/attendance", {
+              method:"POST",
+              cache: "no-cache",
+              headers:{
+                  "content_type":"application/json",
+              },
+               body:JSON.stringify({cred:newSelection.rows})
+              }
+              ).then(response => {
+                 return response.json()
+              })
+             .then(json => {  
+               console.log(json) 
+              })
+         }}/>
           </div>
          </DialogContent>
 
          <DialogActions>
-           <Button autoFocus onClick={handleCancel} color="primary">
-             Cancel
-           </Button>
            <Button onClick={handleOk} color="primary">
              Ok
            </Button>

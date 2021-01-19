@@ -132,7 +132,7 @@ export default function Profileright(props) {
               id="outlined-basic"
               label="Name"
               name="name"
-              value={values.name}
+              value={props.details.name}
               variant="outlined"
               style={{ width: "200px" }}
               onClick={()=>{setDisabled(false)}}
@@ -141,7 +141,7 @@ export default function Profileright(props) {
               id="outlined-basic"
               label="Name"
               name="name"
-              value={values.name}
+              value={props.details.name}
               variant="outlined"
               onChange={handleChange}
               style={{ width: "200px" }}
@@ -167,7 +167,7 @@ export default function Profileright(props) {
               id="outlined-basic"
               label="Email"
               name="newEmail"
-              value={values.newEmail}
+              value={props.details.email}
               variant="outlined"
               style={{ width: "200px" }}
               onClick={()=>{setDisabled(false)}}
