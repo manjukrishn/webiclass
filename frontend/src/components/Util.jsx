@@ -1,24 +1,25 @@
-const TOKEN_KEY = "jwt";
-
-export const login = () => {
-  sessionStorage.setItem(TOKEN_KEY, "TestLogin");
-};
-
 export const isLogin = () => {
-  if (sessionStorage.getItem("isLoggedin")) {
+  if (sessionStorage.getItem("isLoggedin")=="true") {
     return true;
   }
-  return true;
+  return false;
 };
+
+export const isStudent =()=>{
+  if (sessionStorage.getItem("isStudent")=="true") {
+    return true;
+  }
+  return false;
+}
 
 export const isAdminMain = () => {//done
-  if (sessionStorage.getItem("isAdminMain")) {
+  if (sessionStorage.getItem("isAdminMain")=="true") {
     return true;
   }
-  return true;
+  return false;
 };
 export const isAdminCollege = () => {//done
-  if (sessionStorage.getItem("isAdminCollege")) {
+  if (sessionStorage.getItem("isAdminCollege")=="true") {
     return true;
   }
   return false;
@@ -30,15 +31,21 @@ export const isAdminDept = () => {//done
   return false;
 };
 export const isFaculty = () => {//done
-  if (sessionStorage.getItem("isFaculty")) {
+  if (sessionStorage.getItem("isFaculty")=="true") {
     return true;
   }
-  return true;
+  return false;
 };
 export const isHod = () => {
-  if (sessionStorage.getItem("isHod")) {
+  if (sessionStorage.getItem("isHOD")=="true") {
     return true;
   }
   return false;
 };
 
+export const dept =()=>{
+  let c=null;
+  if (c=sessionStorage.getItem("Department")) {
+    return c;
+  }
+}

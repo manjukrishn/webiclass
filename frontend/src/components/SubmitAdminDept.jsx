@@ -46,7 +46,8 @@ export default function CircularIntegration(props) {
     };
   }, []);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = () =>   {
+    props.credentials.studentusn=props.credentials.studentusn.toUpperCase();
     fetch("/addStudent", {
       method:"POST",
       cache: "no-cache",
@@ -68,9 +69,6 @@ export default function CircularIntegration(props) {
       }
       timer.current = window.setTimeout(() => {
         setLoading(false);
-        if(json.status==="Success")
-        props.errorLogging(json.status,json.role[0][0]);
-        else
         props.errorLogging(json.status);
       }, 2000);  
    })

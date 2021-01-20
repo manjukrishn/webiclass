@@ -4,6 +4,7 @@ import Register from "./components/Register";
 import RegisterCollege from "./components/RegisterCollege";
 import Home from "./components/Home";
 import College from "./components/College";
+import AddSubject from "./components/AddSubject";
 import { Switch } from "react-router-dom";
 import { BrowserRouter as Router } from "react-router-dom";
 import Profile from "./components/Profile";
@@ -21,7 +22,9 @@ import Sidebar from "./components/Sidebar";
 import {
   isAdminMain,
   isAdminCollege,
-  isHod
+  isHod,
+  isAdminDept,
+  isLogin
 } from "./components/Util";
 
 export default function App() {
@@ -54,7 +57,6 @@ export default function App() {
         <Switch>
           <Route path={"/login"} component={Login} />
           <Route path={"/register"} component={Register} />
-          <Route path={"/register-college"} component={RegisterCollege} />
           {isAdminMain() && (
             <PrivateRoute path={"/admin-main"} component={AdminMain} />
           )}
@@ -62,15 +64,19 @@ export default function App() {
             <PrivateRoute path={"/admin-main-dpt"} component={AdminMainDept} />
           )}
           {isAdminMain() && (
+            <PrivateRoute path={"/admin-main-sub"} component={AddSubject} />
+          )}
+          {isAdminDept() && (
             <PrivateRoute path={"/admin-main-admin-dpt"} component={AdminMainAdminDept} />
           )}
-          {isAdminMain() && (
+          {isAdminDept() && (
             <PrivateRoute path={"/admin-dpt"} component={AdminDept} />
           )}
-          {isAdminMain() && (
+          {isAdminDept() && (
             <PrivateRoute path={"/admin-dpt-assign"} component={AdminDeptAssign} />
           )}
           {!loading ?
+          <div>
             <table>
               <tr>
                 <td style={{width:"275px"}}>
@@ -82,11 +88,12 @@ export default function App() {
                   {dept.map((item, index) => {
                      return <PrivateRoute path={"/"+item} component={Dept} />;
                   })}
-              
                     <PrivateRoute path={"/profile"} component={Profile} />
                 </td>
               </tr>
-            </table>:<Loading/>}
+            </table>
+             </div>
+            :<Loading/>}
           <Route component={PageNotFound} />
         </Switch>
       </Router>

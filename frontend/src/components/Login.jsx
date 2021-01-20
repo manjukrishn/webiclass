@@ -15,6 +15,8 @@ export default function Login() {
     invalidPassword:false
   });
 
+ 
+
   React.useEffect(() => {
     const res = () => {
       const mailFormat = /^([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{2,4})+)*$/;
@@ -38,26 +40,38 @@ export default function Login() {
       };
     });
   }
+  React.useEffect(()=>{
+    sessionStorage.setItem("isLoggedin", false);
+    sessionStorage.setItem("isFaculty", false);
+    sessionStorage.setItem("isHOD", false);
+    sessionStorage.setItem("isAdminMain", false);
+    sessionStorage.setItem("isAdminDept", false);
+    sessionStorage.setItem("isStudent", false);
+  },[]);
 
-  function errorLogging(value,role){
+  function errorLogging(value,role,dept){
        if(value==="Success"){
          sessionStorage.setItem("isLoggedin", true);
-         if(role==="ADMINCOLLEGE")
-         sessionStorage.setItem("isAdminCollege", true);
-         else if(role==="ADMINMAIN")
-         sessionStorage.setItem("isAdminMain", true);
-         else if(role==="FACULTY")
+         if(role==="1"){
          sessionStorage.setItem("isFaculty", true);
-         else if (role==="ADMINDEPT")
+         sessionStorage.setItem("isHOD", true);
+         }
+         else if(role==="0")
+         sessionStorage.setItem("isAdminMain", true);
+         else if(role==="3")
+         sessionStorage.setItem("isFaculty", true);
+         else if (role==="2")
          sessionStorage.setItem("isAdminDept", true);
-         else if (role==="HOD")
-         sessionStorage.setItem("isHod", true);
-        if(role==="ADMINCOLLEGE"){
-          history.push('/admin-college');
-        }
-        else if(role==="ADMINMAIN")
+         else
+         sessionStorage.setItem("isStudent", true);
+         
+         sessionStorage.setItem("Department",dept);
+         if(role==="0")
           history.push('/admin-main');
-        history.push('/home');
+         else if (role==="2")
+          history.push('/admin-dpt')
+         else
+          history.push('/home');
         setError({
           invalidEmail:false,
           invalidPassword:false
@@ -72,10 +86,11 @@ export default function Login() {
        else{
         setError({
           invalidEmail:true,
-          invalidPassword:true
+          invalidPassword:false
         }) 
        }
   }
+  
   return (
     <div className="login-body">
       <div className="login-container">

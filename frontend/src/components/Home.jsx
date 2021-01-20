@@ -27,7 +27,6 @@ export default function Home(props) {
      console.log(arr);
      setMaterials(arr);
    });
-
    setTimeout(setLoad,2000)
   },[]);
   

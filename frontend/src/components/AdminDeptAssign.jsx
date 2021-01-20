@@ -2,7 +2,7 @@ import React from "react";
 import "./AdminMain.css";
 import TextField from "@material-ui/core/TextField";
 import { useHistory } from "react-router-dom";
-import Submit from "./SubmitAdminMain";
+import Submit from "./SubmitAdminDeptAssign";
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
@@ -22,64 +22,125 @@ export default function AdminMain() {
 }));
   const classes = useStyles();
   const [section,setSection]=React.useState('');
+  const [sectionId,setSectionId]=React.useState('');
   const [faculty,setFaculty]=React.useState('');
+  const [facultyId,setFacultyId]=React.useState('');
   const [subject,setSubject]=React.useState('');
+  const [subjectcode,setSubjectCode]=React.useState('');
   const [facultyArr,setfacultyArr]=React.useState([]);
   const [sectionArr,setsectionArr]=React.useState([]);
   const [subjectArr,setsubjectArr]=React.useState([]);
   
+  const errorLog=(v)=>{
+    console.log(v);
+    setSectionId('');
+    setFaculty('');
+    setFacultyId('');
+    setSubjectCode('');
+    setSubject('');
+    setSection('');
+  }
   React.useEffect(()=>{
-    fetch('/getSectionListDept').then(res=>{
+    fetch('/getSectionListAdminDept').then(res=>{
       return res.json()
    }).then(json=>{
-     setsectionArr(json.sectionList);
+     const arr=[];
+     json.section.map((item,index)=>{
+          arr.push({
+            sectionid:item[0],
+            sectionname:item[1]
+          })
+     })
+     setsectionArr(arr);
    })
   },[]);
 
   React.useEffect(()=>{
+    const ar={
+      sectionid:sectionId,
+      subjectcode:subjectcode
+    }
     fetch('/getFacultyListAdminDept', {
       method:"POST",
       cache: "no-cache",
       headers:{
           "content_type":"application/json",
       },
-       body:JSON.stringify(subject)
+       body:JSON.stringify(ar)
       }).then(res=>{
       return res.json()
    }).then(json=>{
-     setfacultyArr(json.facultyList);
+        const arr=[];
+        json.faculty.map((item,index)=>{
+        arr.push({
+           facultyid:item[1],
+           facultyname:item[0]
+         })
+    })
+     setfacultyArr(arr);
    })
-  },[section]);
+  },[subjectcode,sectionId]);
 
   React.useEffect(()=>{
-    fetch('/getSubjectListAdminDept').then(res=>{
+    fetch('/getSubjectListAdminDept', {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+       body:JSON.stringify(sectionId)
+      }).then(res=>{
       return res.json()
    }).then(json=>{
-     setfacultyArr(json.subjectList);
+    const arr=[];
+    json.section.map((item,index)=>{
+         arr.push({
+           subjectid:item[1],
+           subjectname:item[0]
+         })
+    })
+     setsubjectArr(arr);
    })
-  },[faculty]);
-
+  },[sectionId]);
+  
+  React.useEffect(()=>{
+    if(sectionId && subjectcode && facultyId){
+      setDisabled(false);
+    }
+    else{
+      setDisabled(true);
+    }
+  },[sectionId,subjectcode,facultyId])
+  
+  const [disabled, setDisabled] = React.useState(true);
   const handleChangeSection = (event) => {
     setSection(event.target.value);
+    sectionArr.map((item,index)=>{
+      if(item.sectionname==event.target.value){
+        setSectionId(item.sectionid);
+      }
+    })
   };
 
   const handleChangeSubject = (event) => {
     setSubject(event.target.value);
+    subjectArr.map((item,index)=>{
+      if(item.subjectname==event.target.value){
+        setSubjectCode(item.subjectid);
+      }
+    })
   };
 
   const handleChangeFaculty = (event) => {
     setFaculty(event.target.value);
+    facultyArr.map((item,index)=>{
+      if(item.facultyname==event.target.value){
+        setFacultyId(item.facultyid)
+      }
+    })
+    
   };
-  const [disabled, setDisabled] = React.useState(true);
-  
-  React.useState(()=>{
-     if(section && faculty && subject)
-     setDisabled(false);
-     else
-     setDisabled(true);
-  },[faculty]);
-
-
+ 
   return (
     <div className="admin-main-body">
       <div className="admin-main-container" style={{marginTop:"2%"}}>
@@ -93,17 +154,17 @@ export default function AdminMain() {
           value={section}
           onChange={handleChangeSection}
         >
-
           <MenuItem value="">
             <em>None</em>
           </MenuItem>
         {sectionArr.map((item,index)=>{
           return(
-          <MenuItem value={item}>{item}</MenuItem>
+          <MenuItem value={item.sectionname}>{item.sectionname}</MenuItem>
           )
         })}
         </Select>
       </FormControl>
+      {!!sectionId &&
       <FormControl variant="filled" className={classes.formControl}>
         <InputLabel id="demo-simple-select-filled-label">Subject</InputLabel>
         <Select
@@ -117,16 +178,18 @@ export default function AdminMain() {
           </MenuItem>
           {subjectArr.map((item,index)=>{
           return(
-          <MenuItem value={item}>{item}</MenuItem>
+          <MenuItem value={item.subjectname}>{item.subjectname}</MenuItem>
           )
         })}
         </Select>
-      </FormControl><FormControl variant="filled" className={classes.formControl}>
+      </FormControl>}
+      {!!sectionId && !!subjectcode && 
+      <FormControl variant="filled" className={classes.formControl}>
         <InputLabel id="demo-simple-select-filled-label">Faculty</InputLabel>
         <Select
           labelId="demo-simple-select-filled-label"
           id="demo-simple-select-filled"
-          value={faculty}
+          value={faculty.facultyname}
           onChange={handleChangeFaculty}
         >
           <MenuItem value="">
@@ -134,13 +197,13 @@ export default function AdminMain() {
           </MenuItem>
           {facultyArr.map((item,index)=>{
            return(
-          <MenuItem value={item}>{item}</MenuItem>
+          <MenuItem value={item.facultyname}>{item.facultyname}</MenuItem>
           )
          })}
         </Select>
-      </FormControl>        
+      </FormControl>}        
         <div style={{ width: "85%", marginLeft: "7.5%", marginTop: "40px" }}>
-          <Submit disabled={disabled} credentials={{section:section,subject:subject,faculty:faculty}}/>
+          <Submit disabled={disabled} credentials={{section:sectionId,subject:subjectcode,faculty:facultyId}} errorLog={errorLog}/>
         </div>
         <div
           onClick={() => {

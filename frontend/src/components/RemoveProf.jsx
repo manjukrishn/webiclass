@@ -47,7 +47,21 @@ function ConfirmationDialogRaw(props) {
       prof_uid: "1b1232"
     }
   ]);
-
+  React.useEffect(()=>{
+    fetch('/getFacultyList').then(res=>{return res.json()}).then(json=>{
+      console.log("afkdfnsdnfk")
+      console.log(json.faculty);
+      const arr1=[];
+      json.faculty.map((item,index)=>{
+        arr1.push({
+          prof_email:item[2],
+          prof_name:item[1],
+          prof_uid:item[0]
+        })
+      })
+      setArr(arr1);
+    })
+  },[])
   React.useEffect(() => {
     if (!open) {
       setValue(valueProp);
@@ -69,7 +83,21 @@ function ConfirmationDialogRaw(props) {
   };
 
   const toBeRecieved = (response, uid) => {
-    if (response) {
+    if (response==true) {
+      fetch("/deleteFaculty", {
+        method:"POST",
+        cache: "no-cache",
+        headers:{
+            "content_type":"application/json",
+        },
+         body:JSON.stringify(uid)
+        }
+      ).then(response => {
+      return response.json()
+     })
+     .then(json => {
+        console.log(json.status);      
+     });
       setArr(arr.filter((item) => item.prof_uid !== uid));
     }
   };
@@ -78,7 +106,7 @@ function ConfirmationDialogRaw(props) {
       <Dialog
         disableBackdropClick
         disableEscapeKeyDown
-        maxWidth="xs"
+        maxWidth="sm"
         onEntering={handleEntering}
         aria-labelledby="confirmation-dialog-title"
         open={open}
@@ -95,6 +123,7 @@ function ConfirmationDialogRaw(props) {
           {!!arr.length ? (
             <table style={{ marginRight: "-4%" }}>
               <thead style={{ color: "#2c365d" }}>
+                <th>UID</th> 
                 <th>Name</th>
                 <th>Email</th>
               </thead>
@@ -102,6 +131,15 @@ function ConfirmationDialogRaw(props) {
                 {arr.map((item, index) => {
                   return (
                     <tr>
+                    <td style={{ paddingTop: "3%", width: "150px" }}>
+                        <DarkerDisabledTextField
+                          disabled
+                          multiline
+                          inputProps={{min: 0, style: { textAlign: 'center' }}}
+                          value={item.prof_uid}
+                          variant="outlined"
+                        />
+                      </td>
                       <td style={{ paddingTop: "3%", width: "150px" }}>
                         <DarkerDisabledTextField
                           disabled
@@ -121,7 +159,6 @@ function ConfirmationDialogRaw(props) {
                         <DarkerDisabledTextField
                           disabled
                           multiline
-
                           variant="outlined"
                           inputProps={{min: 0, style: { textAlign: 'center' }}}
                           value={item.prof_email}
@@ -145,12 +182,9 @@ function ConfirmationDialogRaw(props) {
             <div style={{ fontSize: "18px" }}>No one to remove</div>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleOk} color="primary">
-            Ok
+        <DialogActions> 
+         <Button onClick={handleOk} color="primary">
+            Done
           </Button>
         </DialogActions>
       </Dialog>

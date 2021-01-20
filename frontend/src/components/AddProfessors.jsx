@@ -19,7 +19,59 @@ function ConfirmationDialogRaw(props) {
     let d = new Date();
     return d.getTime();
   };
-  const [arr, setArr] = React.useState([]);
+  const [invalid,setInvalid]=React.useState({
+    invalidEmail:false,
+    invalidUid:false,
+  })
+  const [credentials,setCredentials]=React.useState({
+    uid:"",
+    name:"",
+    email:""
+  });
+  const handleClickAdd =()=>{
+    validate();
+    if(credentials.email && credentials.name && credentials.uid && !invalid.invalidEmail && !invalid.invalidUid){
+    fetch("/addFaculty", {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+       body:JSON.stringify(credentials)
+      }
+    ).then(response => {
+    return response.json()
+   })
+   .then(json => {
+      console.log(json.status);
+      if(json.status=="Success"){
+        setInvalid({
+           invalidEmail:false,
+           invalidUid:false
+        })
+        setCredentials({
+          uid:"",
+          name:"",
+          email:""
+        })
+
+      }
+      else if(json.status=="Email already exists"){
+        setInvalid({
+          invalidEmail:true,
+          invalidUid:false
+       })
+      }
+      else{
+        setInvalid({
+          invalidEmail:false,
+          invalidUid:true
+       })
+      }
+        
+   })
+  }
+  }
   React.useEffect(() => {
     if (!open) {
       setValue(valueProp);
@@ -32,44 +84,44 @@ function ConfirmationDialogRaw(props) {
     }
   };
 
-  const handleCancel = () => {
-    onClose();
-  };
-
   const finalValidation = () => {
-    let i = 0;
-    for (i = 0; i < arr.length; i++) {
-      if (arr[i].invalid) return true;
-    }
+    if(!invalid.invalidEmail && !invalid.invalidUid)
     return false;
+    return true;
   };
-  const handleOk = () => {
+  const handledone = () => {
     const re = finalValidation();
     if (re === false) onClose(value);
   };
 
-  const validate = (index) => {
+  const validate = () => {
     const mailFormat = /^([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{2,4})+)*$/;
-    const name = "prof_email";
-    if (arr[index][name].match(mailFormat)) {
-      arr[index].invalid = false;
+    const name = "email";
+    if (credentials.email.match(mailFormat)) {
+      invalid.invalidEmail=false;
     } else {
-      arr[index].invalid = true;
+      invalid.invalidEmail=true;
     }
   };
-  const handleChange = (index) => (event) => {
-    const newArr = [...arr];
-    const { name, value } = event.target;
-    newArr[index][name] = value;
-    setArr(newArr);
-    validate(index);
+
+  const handleChange = (event) => {
+   const { name, value } = event.target;
+   setCredentials((prev)=>{
+     return{
+       ...prev,
+       [name]:value
+     }
+   });
+   const arr=invalid
+   arr.invalidUid=false
+   setInvalid(arr);
   };
   return (
     <div>
       <Dialog
         disableBackdropClick
         disableEscapeKeyDown
-        maxWidth="xs"
+        maxWidth="sm"
         onEntering={handleEntering}
         aria-labelledby="confirmation-dialog-title"
         open={open}
@@ -83,38 +135,34 @@ function ConfirmationDialogRaw(props) {
           </span>
         </DialogTitle>
         <DialogContent dividers>
-          {!!arr.length && (
-            <table style={{ marginRight: "-4%" }}>
+            <table>
               <thead style={{ color: "#2c365d" }}>
                 <th>Email</th>
-                <th style={{ paddingLeft: "20px" }}>Name(Optional)</th>
-          
+                <th style={{ paddingLeft: "20px" }}>Name</th>
+                <th style={{ paddingLeft: "20px" }}>Unique Id</th>
+
               </thead>
               <tbody>
-                {arr.map((item, index) => {
-                  return (
                     <tr>
                       <td style={{ paddingTop: "3%", width: "200px" }}>
-                        {!item.invalid ? (
+                        {!invalid.invalidEmail ? (
                           <TextField
-                            name="prof_email"
-                            id={item.index}
-                            value={item.prof_email}
+                            name="email"
+                            value={credentials.email}
                             variant="outlined"
                             type="email"
-                            onChange={handleChange(index)}
+                            onChange={handleChange}
                             placeholder="Eg. john@gmail.com"
                           />
                         ) : (
                           <TextField
                             error
                             label="Invalid email"
-                            name="prof_email"
-                            id={item.index}
-                            value={item.prof_email}
+                            name="email"
+                            value={credentials.email}
                             variant="outlined"
                             type="email"
-                            onChange={handleChange(index)}
+                            onChange={handleChange}
                             placeholder="Eg. john@gmail.com"
                           />
                         )}
@@ -128,61 +176,54 @@ function ConfirmationDialogRaw(props) {
                       >
                         <TextField
                           variant="outlined"
-                          id={item.index}
-                          onChange={handleChange(index)}
-                          name="prof_name"
-                          value={item.prof_name}
+                          onChange={handleChange}
+                          name="name"
+                          value={credentials.name}
                           placeholder="Eg. john"
                         />
                       </td>
-                      {!!(arr.length > 1) && (
-                        <td style={{ paddingTop: "3%", width: "5px" }}>
-                          <IconButton
-                            onClick={() => {
-                              setArr(
-                                arr.filter((itemIn) => itemIn.id !== item.id)
-                              );
-                            }}
-                          >
-                            <RemoveIcon />
-                          </IconButton>
-                        </td>
-                      )}
+                      <td
+                        style={{
+                          paddingTop: "3%",
+                          paddingLeft: "5%",
+                          width: "190px"
+                        }}
+                      >
+                      {!invalid.invalidUid ?
+                        <TextField
+                          variant="outlined"
+                          onChange={handleChange}
+                          name="uid"
+                          value={credentials.uid}
+                          placeholder="Eg. is00ab"
+                        />:
+                        <TextField
+                          error
+                          variant="outlined"
+                          onChange={handleChange}
+                          name="uid"
+                          label="UID already exists"
+                          value={credentials.uid}
+                          placeholder="Eg. is00ab"
+                        />
+                        }
+                      </td>
                     </tr>
-                  );
-                })}
               </tbody>
             </table>
-          )}
-          <Button
+          {credentials.email && credentials.uid && credentials.name && <Button
             style={{ marginTop: "5%",
           color:"#949cdf",
           opacity:"0.85"
           }}
-            onClick={() => {
-              setArr((prev) => {
-                return [
-                  ...prev,
-                  {
-                    id: getTimeFunc(),
-                    index: getTimeFunc(),
-                    prof_email: "",
-                    prof_name: "",
-                    invalid: false
-                  }
-                ];
-              });
-            }}
+            onClick={handleClickAdd}
           >
             + Add New
-          </Button>
+          </Button>}
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleOk} color="primary">
-            Ok
+          <Button onClick={handledone} color="primary">
+            Done
           </Button>
         </DialogActions>
       </Dialog>

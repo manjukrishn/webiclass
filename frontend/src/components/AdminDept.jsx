@@ -2,7 +2,7 @@ import React from "react";
 import "./AdminMain.css";
 import TextField from "@material-ui/core/TextField";
 import { useHistory } from "react-router-dom";
-import Submit from "./SubmitAdminMain";
+import Submit from "./SubmitAdminDept";
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from "@material-ui/core/Button"
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -23,21 +23,11 @@ export default function AdminMain() {
   const [credentials, setCredentials] = React.useState({
     studentemail: "",
     studentname:"",
-    studentdept:"",
     studentusn:"",
     section:""
   });
   const [disabled, setDisabled] = React.useState(true);
   const [error,setError]=React.useState({invalidEmail:false});
-  const [dept,setDept]=React.useState([]);
-
-  React.useEffect(()=>{
-    fetch('/getDepartmentListAdminMain').then(res=>{
-      return res.json()
-   }).then(json=>{
-     setDept(json.dept);
-   })
-  },[]);
   
   React.useEffect(() => {
     const res = () => {
@@ -46,10 +36,13 @@ export default function AdminMain() {
         return false;
       return true;
     };
+    console.log(credentials);
     const fans = res();
-    setDisabled(true);
-    if(credentials.hodname && credentials.dept && credentials.hodemail && !fans)
+    if(credentials.studentname  && credentials.studentemail && !fans && credentials.studentusn && credentials.section)
     setDisabled(false);
+    else
+    setDisabled(true);
+
   }, [credentials]);
 
   function handleChange(e) {
@@ -73,10 +66,8 @@ export default function AdminMain() {
        setError({
          invalidEmail:false
        });
-     
-     history.push('/login');
     }
-    else if(value==="Email Already exist"){
+    else if(value==="Email already exists"){
        setError({
          invalidEmail:true
        })
@@ -92,8 +83,8 @@ export default function AdminMain() {
         {error.invalidEmail ?
            <TextField
             error
-             name="studentemail"
-             value={credentials.studentemail}
+             name="studentusn"
+             value={credentials.studentusn}
              label={
                <span style={{ fontFamily: '"Nunito", sans-serif' }}>Student already present</span>
              }
@@ -106,8 +97,8 @@ export default function AdminMain() {
         />
         :
         <TextField
-          name="studentemail"
-          value={credentials.studentemail}
+          name="studentusn"
+          value={credentials.studentusn}
           label={
             <span style={{ fontFamily: '"Nunito", sans-serif' }}>Student USN</span>
           }
@@ -135,8 +126,8 @@ export default function AdminMain() {
         />
         
          <TextField
-          name="studentusn"
-          value={credentials.studentusn}
+          name="studentemail"
+          value={credentials.studentemail}
           label={
             <span style={{ fontFamily: '"Nunito", sans-serif' }}>Student Email</span>
           }

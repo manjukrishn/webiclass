@@ -1,5 +1,4 @@
 import React from "react";
-import {isAdminDept, isHod} from "./Util";
 import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -7,6 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Tooltip from "@material-ui/core/Tooltip";
 import "./Department.css";
 import AddClass from "./AddClass";
+import {isHod,dept} from "./Util";
 import { useLocation } from "react-router-dom";
 import Sectionright from "./Sectionright";
 function getDept() {
@@ -38,6 +38,9 @@ export default function Deptright(prop) {
   const [heading, setHeading] = React.useState();
   const [sec_id,setSecId]=React.useState();
   
+  const setFlag=()=>{
+    prop.flag(1);
+  }
   React.useEffect(() => {
     setView(false);
   }, [location]);
@@ -51,7 +54,7 @@ export default function Deptright(prop) {
   }
 
   return !view ? (
-    <Dept onView={viewer} changeSection={section} dept={getDept()} />
+    <Dept onView={viewer} changeSection={section} dept={getDept()} flag={setFlag} />
   ) : (
     <Sectionright heading={heading} secId={sec_id} dept={getDept()} />
   );
@@ -64,6 +67,9 @@ function Dept(prop) {
     document.documentElement.clientWidth ||
     document.body.clientWidth;
   if (width < 1700) paddingLef = "4.5%";
+  const setFlag=()=>{
+    prop.flag(1);
+  }
   return (
     <div
       style={{
@@ -96,9 +102,10 @@ function Dept(prop) {
             >
               {prop.dept}
             </h1>
-          </td>{ 
+          </td>{
+            isHod() && dept()==getDept() && 
           <td>
-            <AddClass dept={prop.dept}/>
+            <AddClass flag={setFlag} dept={prop.dept}/>
           </td>}
         </tr>
       </table>

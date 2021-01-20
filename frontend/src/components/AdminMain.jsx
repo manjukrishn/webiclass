@@ -192,6 +192,15 @@ export default function AdminMain() {
         >
           Add Admin Department
         </div>
+        <div
+          onClick={() => {
+            history.push("/admin-main-sub");
+          }}
+          className="admin-main-go-home"
+          style={{ marginTop: "20px",cursor:"pointer" }}
+        >
+          Add Subject
+        </div>
       </div>
     </div>
   );

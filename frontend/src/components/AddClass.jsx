@@ -47,17 +47,19 @@ function ConfirmationDialogRaw(props) {
 
   const handleOk = () => {
     sectionValues.sectionId=props.dept+" "+sectionValues.section;
-    sectionValues.dept=props.dept;
-    
+    sectionValues.sectionId = sectionValues.sectionId.replace(/\s+/g, '');
+    sectionValues.dept=props.dept.replace(/\s+/g, '');
+    sectionValues.dept=sectionValues.dept.toUpperCase();
     fetch("/addSection",{
       method:"POST",
       cache:"no-cache",
       headers:{
         "content_type":"application/json",
       },
-      body:JSON.stringify({class:sectionValues})
+      body:JSON.stringify(sectionValues)
      }).then(response=>response.json()).then(data=>{console.log(data);});
     onClose(value);
+    props.flag(1);
   };
   
   const handleChange = (event) => {
@@ -203,6 +205,9 @@ export default function ConfirmationDialog(props) {
     }
   };
 
+  const setFlag=()=>{
+    props.flag(1);
+  }
   return (
     <div className={classes.root}>
       <List component="div" role="list">
@@ -228,6 +233,7 @@ export default function ConfirmationDialog(props) {
           onClose={handleClose}
           value={value}
           dept={props.dept}
+          flag={setFlag}
         />
       </List>
     </div>

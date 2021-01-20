@@ -51,12 +51,21 @@ function ConfirmationDialogRaw(props) {
   }, [valueProp, open]);
   
   React.useEffect(()=>{
-    fetch('/getDepartmentListAdminMain').then(res=>{
-        return res.json()
-     }).then(json=>{
-       setArr(json.studentList);
-     })
+    fetch('/getStudentListAdminDept').then(res=>{return res.json()}).then(json=>{
+      console.log("afkdfnsdnfk")
+      console.log(json.faculty);
+      const arr1=[];
+      json.faculty.map((item,index)=>{
+        arr1.push({
+          prof_email:item[2],
+          prof_name:item[1],
+          prof_uid:item[0]
+        })
+      })
+      setArr(arr1);
+    })
   },[])
+
   const handleEntering = () => {
     if (radioGroupRef.current != null) {
       radioGroupRef.current.focus();

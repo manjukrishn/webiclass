@@ -67,11 +67,8 @@ export default function CircularIntegration(props) {
         setSuccess(true);
       }
       timer.current = window.setTimeout(() => {
+        props.errorLog("success")
         setLoading(false);
-        if(json.status==="Success")
-        props.errorLogging(json.status,json.role[0][0]);
-        else
-        props.errorLogging(json.status);
       }, 2000);  
    })
     if (!loading) {

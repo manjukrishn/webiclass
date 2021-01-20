@@ -69,7 +69,7 @@ export default function CircularIntegration(props) {
       timer.current = window.setTimeout(() => {
         setLoading(false);
         if(json.status==="Success")
-        props.errorLogging(json.status,json.role[0][0]);
+        props.errorLogging(json.status,json.role[0][0],json.dept);
         else
         props.errorLogging(json.status);
       }, 2000);  
@@ -127,3 +127,4 @@ export default function CircularIntegration(props) {
     </div>
   );
 }
+

@@ -36,12 +36,12 @@ function ConfirmationDialogRaw(props) {
       { field: 'Name', headerName: 'Name', width: 180 }
     ];
     
-    const rows = [
+    const [rows,setRows] =React.useState ([
       { id: 1,USN:"4SF18IS001", Name: 'Afeel'},
       { id: 4,USN:"4SF18IS025", Name: 'Dharshan' },
       { id: 2,USN:"4SF18IS051", Name: 'Manjukrishna' },
       { id: 3,USN:"4SF18IS053", Name: 'Mayur' }
-    ];
+    ]);
     
   const handleDateChange=(e)=>{
     setDate(e.target.value)
@@ -59,7 +59,8 @@ function ConfirmationDialogRaw(props) {
    },
  }));
    const classes = useStyles();
-  
+   const [sectionArr,setsectionArr]=React.useState([]);
+   const [subjectArr,setsubjectArr]=React.useState([]);
    const [time,setTime]=React.useState('7.30');
    const [date,setDate]=React.useState('');
    const { onClose, value: valueProp, open, ...other } = props;
@@ -67,11 +68,8 @@ function ConfirmationDialogRaw(props) {
    const radioGroupRef = React.useRef(null);
    const [age, setAge] = React.useState('');
    const [section,setSection]=React.useState('');
+   const [sectionId,setSectionId]=React.useState('');
    const [subject,setSubject]=React.useState('');
-
-   const handleChangeSection = (event) => {
-     setSection(event.target.value);
-   };
  
    const handleChangeSubject = (event) => {
     setSubject(event.target.value);
@@ -98,7 +96,51 @@ function ConfirmationDialogRaw(props) {
        prof_uid: "1b1232"
      }
    ]);
- 
+  React.useEffect(()=>{
+    fetch('/getSectionListAdminDept').then(res=>{
+      return res.json()
+   }).then(json=>{
+     const arr=[];
+     json.section.map((item,index)=>{
+          arr.push({
+            sectionid:item[0],
+            sectionname:item[1]
+          })
+     })
+     setsectionArr(arr);
+   })
+  },[]);
+
+  React.useEffect(()=>{
+    fetch("/getSubjectList", {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+       body:JSON.stringify(sectionId)
+      }
+    ).then(res=>{
+      return res.json()
+   }).then(json=>{
+     const arr=[];
+     json.subject.map((item,index)=>{
+          arr.push({
+            subjectcode:item[0]
+          })
+     })
+     setsubjectArr(arr);
+   })
+  },[section]);
+
+  const handleChangeSection = (event) => {
+    setSection(event.target.value);
+    sectionArr.map((item,index)=>{
+      if(item.sectionname==event.target.value){
+        setSectionId(item.sectionid);
+      }
+    })
+  };
    React.useEffect(()=>{
      const cred={
        section:section,
@@ -112,15 +154,24 @@ function ConfirmationDialogRaw(props) {
        headers:{
            "content_type":"application/json",
        },
-        body:JSON.stringify({cred:cred})
+        body:JSON.stringify(sectionId)
        }
      ).then(response => {
      return response.json()
     })
     .then(json => {  
-       setArr(json.studentList);
+       console.log(json.studentList);
+       const arr=[];
+       json.studentList.map((item,index)=>{
+           arr.push({
+             id:index+1,
+             USN:item[0],
+             Name:item[1]
+           })
+       })
+       setRows(arr);
     })
-   },[section]);
+   },[sectionId]);
    
    React.useEffect(() => {
      if (!open) {
@@ -164,40 +215,44 @@ function ConfirmationDialogRaw(props) {
            >
              Attendance
            </span>
-           <FormControl className={classes.formControl} style={{marginLeft:"160px"}}>
-            <InputLabel id="demo-simple-select-outlined-label">Section</InputLabel>
-            <Select
-              labelId="demo-simple-select-outlined-label"
-              id="demo-simple-select-outlined"
-              value={section}
-              onChange={handleChangeSection}
-              label="Section"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl  className={classes.formControl}  style={{marginLeft:"5%"}}>
-            <InputLabel id="demo-simple-select-outlined-label">Subject</InputLabel>
-            <Select
-              labelId="demo-simple-select-outlined-label"
-              id="demo-simple-select-outlined"
-              value={subject}
-              onChange={handleChangeSubject}
-              label="Subject"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
+           <FormControl variant="filled" className={classes.formControl} style={{marginLeft:"150px"}}>
+        <InputLabel id="demo-simple-select-filled-label">Section</InputLabel>
+        <Select
+          labelId="demo-simple-select-filled-label"
+          id="demo-simple-select-filled"
+          value={section}
+          onChange={handleChangeSection}
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+        {sectionArr.map((item,index)=>{
+          return(
+          <MenuItem value={item.sectionname}>{item.sectionname}</MenuItem>
+          )
+        })}
+        </Select>
+        </FormControl>
+        {!!sectionId &&
+      <FormControl variant="filled" className={classes.formControl}>
+        <InputLabel id="demo-simple-select-filled-label">Subject</InputLabel>
+        <Select
+          labelId="demo-simple-select-filled-label"
+          id="demo-simple-select-filled"
+          value={subject}
+          onChange={handleChangeSubject}
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {subjectArr.map((item,index)=>{
+          return(
+          <MenuItem value={item.subjectcode}>{item.subjectcode}</MenuItem>
+          )
+        })}
+        </Select>
+      </FormControl>}
+
           <FormControl className={classes.formControl} style={{marginLeft:"5%"}}>
               <TextField
                 id="date"
@@ -236,7 +291,6 @@ function ConfirmationDialogRaw(props) {
          <DialogContent dividers style={{ backgroundColor: "#f2f2f0" }}>
          <div style={{ height: 400, width: '100%' }}>
              <DataGrid rows={rows} columns={columns} pageSize={5} checkboxSelection onSelectionChange={(newSelection) => {
-              
              fetch("/attendance", {
               method:"POST",
               cache: "no-cache",

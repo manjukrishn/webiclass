@@ -63,12 +63,8 @@ export default function FullScreenDialog(props) {
   React.useEffect(()=>{
     fetch('/getFacultyName').then(response=>response.json()).then
     (data=>{
-       console.log(data.name);
-       console.log(data.uid)
-       let name="uid"
-       addMaterial.uid=data.uid
-       addMaterial.facultyName=data.name
-      console.log(addMaterial)
+       console.log(data.status);
+       addMaterial.facultyName=data.name;
     });
   },[]);
   
@@ -79,13 +75,14 @@ export default function FullScreenDialog(props) {
       headers:{
         "content_type":"application/json",
       },
-      body:JSON.stringify({secId:props.secId})
+      body:JSON.stringify(props.secId)
      }).then(response=>response.json()).then
     (data=>{
        console.log(data.subjects);
       setHandledSubject(data.subjects);
     });
-  },[])
+  },[]);
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -105,13 +102,14 @@ export default function FullScreenDialog(props) {
   }
   const handleSave=()=>{
     const arr=[];
+    addMaterial.subid=subject;
     fetch("/addMaterial",{
       method:"POST",
       cache:"no-cache",
       headers:{
         "content_type":"application/json",
       },
-      body:JSON.stringify({material:addMaterial})
+      body:JSON.stringify(addMaterial)
      }).then(response=>response.json()).then(data=>{console.log(data);});
     setOpen(false);
     props.flag(true);
@@ -186,7 +184,7 @@ export default function FullScreenDialog(props) {
         </AppBar>
         <List>
           <ListItem>
-            <ListItemText primary="Faculty" secondary={addMaterial.facultyMailId} />
+            <ListItemText primary="Faculty" secondary={addMaterial.facultyName} />
           </ListItem>
           <Divider />
           <ListItem>
@@ -231,9 +229,8 @@ export default function FullScreenDialog(props) {
           <ConfirmationDialog addValues={addValue}/>
           <ListItem>
             <ListItemText
-              name="date"
               primary="Date"
-              secondary={<InputBase type="date" defaultValue={getDate()} />}
+              secondary={<InputBase type="date" value={addMaterial.date} name="date"/>}
               onChange={handleChange}
               value={addMaterial.date}
             />

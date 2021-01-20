@@ -15,11 +15,14 @@ export default function Dept({ routes }) {
   }
   const [sections,setSection] = React.useState([]);
   const [loading,setLoading]=React.useState(true);
-
+  const [flag1,setFlag1]=React.useState(1);
   function setLoad(){
     setLoading(false);
   }
-
+  
+  const setFlag=()=>{
+    setFlag1(!flag1);
+  }
   React.useEffect(()=>{
     fetch("/getSection",{
       method:"POST",
@@ -50,11 +53,11 @@ export default function Dept({ routes }) {
       setSection(arr);      
     })
    setTimeout(setLoad,2000)
-  },[getDept()]);
+  },[getDept(),flag1]);
 
   return (
     <div style={{ height: "100%" }}>
-      {!loading ? <Deptright section={sections}/> : <Loading/>}    
+      {!loading ? <Deptright section={sections} flag={setFlag}/> : <Loading/>}    
    </div>
   );
 }

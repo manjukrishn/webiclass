@@ -36,6 +36,8 @@ def userLoggedIn(email,password):
 @app.route('/login',methods=['POST']) #done
 def login():
   conn=sqlite3.connect('Webiclass.db')
+  c=conn.cursor()
+  conn=sqlite3.connect('Webiclass.db')
   data=request.json
   email=data['email']
   password=data['password']
@@ -46,7 +48,12 @@ def login():
     return {"status":"Invalid password"}
   
   global role
-  return {"status":"Success","role":role}      
+  global uid
+  dept=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+  dept=dept.fetchall()
+  dept=dept[0][0]
+  conn.commit()
+  return {"status":"Success","role":role,"dept":dept}      
 
 @app.route('/register',methods=['POST']) #done
 def register():
@@ -73,7 +80,7 @@ def register():
      conn.commit()
      return {"status":"Success"}
 
-  c.execute("INSERT INTO USER VALUES("+"\'"+uid+"\'"+",\'"+name+",\'"+email+"\'"+","+"\'4\'"+","+"\'\'"+","+"\'\'"+","+"\'"+password+"\')")
+  c.execute("INSERT INTO USER VALUES("+"\'"+uid+"\'"+",\'"+name+",\'"+email+"\'"+","+"\'5\'"+","+"\'\'"+","+"\'\'"+","+"\'"+password+"\')")
   conn.commit()
   conn.close()
   return {"status":"Success"}
@@ -168,37 +175,43 @@ def getStudentListDept():
 
 @app.route('/addStudent',methods=['POST'])
 def addStudent():
-    conn=sqlite3.connect('Webiclass.db')  
-    c=conn.cursor()
-    data=request.json
-    name=data["studentname"]
-    usn=data["studentusn"]
-    email=data["studentemail"]
-    role="4"
-    dpt=data["dpt"]
-    sec_name=data["section"]
-    global uid
-    query=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
-    query=query.fetchall()
-    dpt=query[0][0]
-    query=c.execute("SELECT HOD_ID FROM USER WHERE DEPARTMENT_NAME="+"\'"+dpt+"\'")
-    query=query.fetchall()
-    hod_id=query[0][0]   
-    password="NULL"
-    query=c.execute("SELECT * FROM USER WHERE UID="+"\'"+uid+"\'")
-    query=query.fetchall()
-    query2=c.execute("SELECT * FROM USER WHERE USN="+"\'"+uid+"\'")
-    query2=query2.fetchall()
-    if(len(query) or len(query2)):
-       return {"status":"Email Already exists"}
-    c.execute("INSERT INTO USER VALUES("+"\'"+usn+"\'"+","+"\'"+name+"\'"+","+"\'"+email+"\'"+","+"\'"+role+"\'"+","+"\'"+hod_id+"\'"+","+"\'"+dpt+"\'"+","+"'NULL')")
-    query=c.execute("SELECT SID FROM SECTION WHERE SECTION_NAME="+"\'"+sec_name+"\' AND DEPARTMENT_NAME="+"\'"+dpt+"\'")
-    query=query.fetchall()
-    sid=query[0][0]
-    c.execute("INSERT INTO STUDENT VALUES("+"\'"+uid+"\'"+","+"\'"+sid+"\')")
-    conn.commit()
-    conn.close()
-    return {"status":"Success"}
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   user=c.execute("SELECT PASSWORD FROM USER WHERE EMAIL="+"\'"+data["studentemail"]+"\'")  
+   user=user.fetchall()
+   if(user):
+      user=user[0][0]
+      if(user!='NULL'):
+        return{"status":"Email already exists"}  
+   user=c.execute("SELECT PASSWORD FROM USER WHERE UID="+"\'"+data["studentusn"]+"\'")  
+   user=user.fetchall()
+   if(user):
+      user=user[0][0]
+      if(user!='NULL'):
+        return {"status":"Invalid Uid"}
+   
+   role="4"
+   q=c.execute("SELECT * FROM USER WHERE EMAIL="+"\'"+data["studentemail"]+"\' AND PASSWORD='NULL'")
+   q=q.fetchall()
+   if(len(q)):
+      c.execute("UPDATE SET USER ROLE='4' WHERE EMAIL="+"\'"+data["studentemail"]+"\'")
+      conn.commit()
+      return {"status":"Success"}
+   global uid
+   dept=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+   dept=dept.fetchall()
+   print(dept)
+   password='NULL'
+   c.execute("INSERT INTO USER VALUES("+"\'"+data["studentusn"]+"\'"+","+"\'"+data["studentname"]+"\'"+","+"\'"+data["studentemail"]+"\'"+","+"\'"+role+"\'"+","+"\'"+uid+"\'"+","+"\'"+dept[0][0]+"\'"+","+password+")")
+   conn.commit()
+   secid=c.execute("SELECT SID FROM SECTION WHERE NAME="+"\'"+data["section"]+"\'")
+   secid=secid.fetchall()
+   secid=secid[0][0]
+   c.execute("INSERT INTO STUDENT VALUES("+"\'"+data["studentusn"]+"\'"+","+"\'"+secid+"\'")
+   conn.commit()
+   return {"status":"Success"}
+
 
 @app.route("/getSectionListAdminDept")
 def getSectionListAdminMain():
@@ -208,7 +221,7 @@ def getSectionListAdminMain():
     query=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
     query=query.fetchall()
     dpt=query[0][0]
-    query=c.execute("SELECT NAME FROM SECTION WHERE UID="+"\'"+uid+"\' AND DEPARTMENT_NAME="+"\'"+dpt+"\'")
+    query=c.execute("SELECT SID,NAME FROM SECTION WHERE DEPARTMENT_NAME="+"\'"+dpt+"\'")
     query=query.fetchall()
     return {"section":query}
     
@@ -217,21 +230,19 @@ def getFacultyListAdminMain():
     conn=sqlite3.connect('Webiclass.db')  
     c=conn.cursor()
     data=request.json
-    subject=data["subject"]
-    subject=c.execute("SELECT U.NAME FROM USER U,SUBJECT S WHERE U.UID=S.UID S.NAME!="+"\'"+subject+"\'")
+    sectionid=data["sectionid"]
+    subjectcode=data["subjectcode"]
+    subject=c.execute("SELECT U.NAME,U.UID FROM USER U WHERE U.ROLE='1' OR U.ROLE='3' AND U.UID NOT IN(SELECT UID FROM SUBJECT WHERE SID="+"\'"+sectionid+"\' AND CODE="+"\'"+subjectcode+"\')")
     subject=subject.fetchall()
-    return {"subject":subject}
+    return {"faculty":subject}
 
 @app.route("/getSubjectListAdminDept",methods=['POST'])
 def getSubjectListAdminMain():
     conn=sqlite3.connect('Webiclass.db')  
     c=conn.cursor()
-    global uid
-    query=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
-    query=query.fetchall()
-    dpt=query[0][0]
-    sid=c.execute("SELECT SID FROM SECTION WHERE ")
-    query=c.execute("SELECT NAME FROM SUBJECT WHERE NAME="+"\'"+dpt+"\'")
+    data=request.json
+    sectionid=data
+    query=c.execute("SELECT SUBNAME,SUBCODE FROM SUB WHERE SUBCODE NOT IN(SELECT CODE FROM SUBJECT WHERE SID="+"\'"+sectionid+"\')")
     query=query.fetchall()
     return {"section":query}
    
@@ -258,11 +269,11 @@ def home():
        query=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
        query=query.fetchall()
        dpt=query[0][0]
-       queryMaterial=c.execute("SELECT M.LINK,M.TYPE,U.NAME,S.NAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUBJECT S WHERE S.CODE=M.CODE AND S.UID=U.UID AND U.DEPARTMENT_NAME="+"\'"+dpt+"\'")
+       queryMaterial=c.execute("SELECT M.LINK,M.DESCRIPTION,M.TYPE,U.NAME,S.SUBNAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUB S WHERE M.CODE=S.SUBCODE AND U.UID=M.UID AND U.DEPARTMENT_NAME="+"\'"+dpt+"\'")
        queryMaterial=queryMaterial.fetchall()
        return {"material":queryMaterial}
    
-   queryMaterial=c.execute("SELECT M.LINK,M.TYPE,U.NAME,S.NAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUBJECT S WHERE M.CODE=S.CODE AND S.UID=U.UID")
+   queryMaterial=c.execute("SELECT DISTINCT SELECT M.LINK,M.DESCRIPTION,M.TYPE,U.NAME,S.SUBNAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUBJECT S,SUB SS WHERE M.CODE=S.CODE AND S.CODE=SS.SUBCODE AND S.UID=U.UID")
    query=queryMaterial.fetchall()
    return {"material":query}
 
@@ -293,6 +304,7 @@ def addSection():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
    data=request.json
+   print(data)
    section=data["section"]
    section_id=data["sectionId"]
    dept=data["dept"]
@@ -306,21 +318,26 @@ def getSectionTable():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
    data=request.json
-   section_id=data["sectionId"]
-   dept=data["dept"]
-   queryMaterial=c.execute("SELECT M.LINK,M.TYPE,U.NAME,S.NAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUBJECT S,SECTION SE WHERE S.CODE=M.CODE AND S.UID=U.UID AND U.DEPARTMENT_NAME="+"\'"+dept+"\' AND "+"\' SE.SID=S.SID AND S.SID="+"\'"+section_id+"\'")
+   section_id=data
+   global uid
+   dept=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+   dept=dept.fetchall()
+   dept=dept[0][0]
+   queryMaterial=c.execute("SELECT DISTINCT M.LINK,M.DESCRIPTION,M.TYPE,U.NAME,S.SUBNAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUB S WHERE S.SUBCODE=M.CODE AND U.UID=M.UID AND U.DEPARTMENT_NAME="+"\'"+dept+"\' AND "+"M.ID="+"\'"+section_id+"\'")
    queryMaterial=queryMaterial.fetchall()
    conn.commit()
-   return {"status":"success"}
+   print(queryMaterial)
+   return {"status":"success","material":queryMaterial}
 
 @app.route('/getHandledSubjects',methods=['POST'])
 def getHandledSubjects():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
    data=request.json
-   section_id=data["sectionId"]
+   print(data)
+   section_id=data
    global uid
-   query=c.execute("SELECT S.CODE,S.NAME FROM SUBJECT WHERE S S.UID="+"\'"+uid+"\' AND S.SID="+"\'"+section_id+"\'")
+   query=c.execute("SELECT SS.SUBCODE,SS.SUBNAME FROM SUBJECT S,SUB SS WHERE SS.SUBCODE=S.CODE AND S.UID="+"\'"+uid+"\' AND S.SID="+"\'"+section_id+"\'")
    query=query.fetchall()
    return {"subjects":query}
 
@@ -329,29 +346,28 @@ def addMaterial():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
    data=request.json
+   print(data)
    link=data["link"]
-   date=data["link"]
-   subid=data["link"]
-   typeo=data["link"]
+   date=data["date"]
+   subid=data["subid"]
+   typeo=data["type"]
    desc=data["desc"]
    secId=data["secId"]
-   c.execute("INSERT INTO MATERIAL VALUES("+"\'"+link+"\'"+","+"\'"+date+"\'"+","+"\'"+typeo+"\'"+","+"\'"+desc+"\'"+","+"\'"+code+"\'"+","+"\'"+secId+"\')")
+   global uid
+   c.execute("INSERT INTO MATERIAL VALUES("+"\'"+link+"\'"+","+"\'"+date+"\'"+","+"\'"+typeo+"\'"+","+"\'"+desc+"\'"+","+"\'"+subid+"\'"+","+"\'"+secId+"\'"+","+"\'"+uid+"\')")
    conn.commit()
    return {"status":"Success"}
 
-# @app.route('/getStudentList',methods=['POST'])
-# def getStudentList():
-#    conn=sqlite3.connect('Webiclass.db')
-#    c=conn.cursor()
-#    data=request.json
-#    section=data["section"]
-#    subject=data["subject"]
-#    time=data["time"]
-#    date=data["date"] 
-#    query=c.execute("SELECT U.UID,U.NAME FROM USER U,STUDENT ST WHERE ST.USN=U.UID AND ST.ID="+"\'"+section+"\'")
-#    query=query.fetchall()
-#    conn.commit()
-#    return {"studentList":query}
+@app.route('/getStudentList',methods=['POST'])
+def getStudentList():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   section=data
+   query=c.execute("SELECT U.UID,U.NAME FROM USER U,STUDENT ST WHERE ST.USN=U.UID AND ST.ID="+"\'"+section+"\'")
+   query=query.fetchall()
+   conn.commit()
+   return {"studentList":query}
 
 @app.route('/attendance',methods=['POST'])
 def attendance():
@@ -374,23 +390,146 @@ def attendance():
 
 @app.route('/getProfile')
 def profile():
+      conn=sqlite3.connect('Webiclass.db')
+      c=conn.cursor()
+      global uid
+      profile=c.execute("SELECT UID,NAME,EMAIL,DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+      profile1=profile.fetchall()
+      role=c.execute("SELECT ROLE FROM USER WHERE UID="+"\'"+uid+"\'")
+      role1=role.fetchall()
+      print(role1)
+      role1=role1[0][0]
+      if(role1=="1" or role1=="3"):
+         global uid
+         material=c.execute("SELECT M.LINK,M.DESCRIPTION,M.TYPE,U.NAME,S.SUBNAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUB S WHERE M.CODE=S.SUBCODE AND U.UID=M.UID AND U.UID="+"\'"+uid+"\'")
+         return {"material":material.fetchall(),"details":profile1}
+      global uid
+      secid=c.execute("SELECT ID FROM STUDENT WHERE USN="+"\'"+uid+"\'")
+      secid=secid.fetchall()
+      secid=secid[0][0]
+      material=c.execute("SELECT M.LINK,M.DESCRIPTION,M.TYPE,M.DATE,U.NAME,S.SUBNAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUB S,STUDENT SS WHERE S.SUBCODE=M.CODE AND U.UID=M.UID AND SS.ID="+"\'"+secid+"\'")
+      material=material.fetchall()
+      conn.close()
+      return {"details":profile1,"material":material}
+
+@app.route('/addFaculty',methods=['POST'])
+def addFaculty():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   user=c.execute("SELECT PASSWORD FROM USER WHERE EMAIL="+"\'"+data["email"]+"\'")  
+   user=user.fetchall()
+   if(user):
+      user=user[0][0]
+      if(user!='NULL'):
+        return{"status":"Email already exists"}  
+   user=c.execute("SELECT PASSWORD FROM USER WHERE UID="+"\'"+data["uid"]+"\'")  
+   user=user.fetchall()
+   if(user):
+      user=user[0][0]
+      if(user!='NULL'):
+         return {"status":"Invalid Uid"}
+   
+   role="3"
+   q=c.execute("SELECT * FROM USER WHERE EMAIL="+"\'"+data["email"]+"\' AND PASSWORD='NULL'")
+   q=q.fetchall()
+   if(len(q)):
+      c.execute("UPDATE SET USER ROLE='3' WHERE EMAIL="+"\'"+data["email"]+"\'")
+      conn.commit()
+      return {"status":"Success"}
+   global uid
+   dept=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+   dept=dept.fetchall()
+   print(dept)
+   password='NULL'
+   c.execute("INSERT INTO USER VALUES("+"\'"+data["uid"]+"\'"+","+"\'"+data["name"]+"\'"+","+"\'"+data["email"]+"\'"+","+"\'"+role+"\'"+","+"\'"+uid+"\'"+","+"\'"+dept[0][0]+"\'"+","+password+")")
+   conn.commit()
+   return {"status":"Success"}
+
+@app.route('/getFacultyList')
+def getFacultyList():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
    data=request.json
    global uid
-   profile=c.execute("SELECT UID,NAME,EMAIL,DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
-   profile=profile.fetchall()
-   role=c.execute("SELECT ROLE FROM USER WHERE UID="+"\'"+uid+"\'")
-   role=role.fetchall()
-   role=role[0][0]
-   if(role=="1" or role=="3"):
-      material=c.execute("SELECT M.LINK,M.DESCRIPTION,M.TYPE,M.DATE,U.NAME,S.NAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUBJECT S WHERE S.CODE=M.CODE AND U.UID=M.UID")
-      return {"material":material}
-   id=c.execute("SELECT ID FROM STUDENT WHERE USN="+"\'"+uid+"\'")
-   id=id.fetchall()
-   print(id)
-   id=id[0]
-   material=c.execute("SELECT M.LINK,M.DESCRIPTION,M.TYPE,M.DATE,U.NAME,S.NAME,U.DEPARTMENT_NAME,M.DATE FROM MATERIAL M,USER U,SUBJECT S,STUDENT SS WHERE S.CODE=M.CODE AND U.UID=SS.USN AND SS.ID="+"\'"+id+"\'")
-   material=material.fetchall()
-   conn.close()
-   return {"details":profile,"material":material}
+   dept=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+   dept=dept.fetchall()
+   dept=dept[0][0]
+   faculty=c.execute("SELECT UID,NAME,EMAIL FROM USER WHERE ROLE='3' AND DEPARTMENT_NAME="+"\'"+dept+"\'")
+   faculty=faculty.fetchall()
+   print(faculty)
+   return {"faculty":faculty}
+
+@app.route('/deleteFaculty',methods=['POST'])
+def deleteFaculty():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   c.execute("DELETE FROM USER WHERE UID=\'"+data+"\'")
+   conn.commit()
+   return {"status":"Success"}
+
+@app.route('/getStudentListAdminDept')
+def getStudentListAdminDept():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   global uid
+   dept=c.execute("SELECT DEPARTMENT_NAME FROM USER WHERE UID="+"\'"+uid+"\'")
+   dept=dept.fetchall()
+   dept=dept[0][0]
+   faculty=c.execute("SELECT UID,NAME,EMAIL FROM USER WHERE ROLE='4' AND DEPARTMENT_NAME="+"\'"+dept+"\'")
+   faculty=faculty.fetchall()
+   print(faculty)
+   return {"faculty":faculty}
+
+@app.route('/addSubject',methods=['POST'])
+def addSubject():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   sub=c.execute("SELECT * FROM SUB WHERE SUBCODE="+"\'"+data["subjectcode"]+"\'")
+   sub=sub.fetchall()
+   if(sub):
+      return {"status":"Subject already exists"}
+   c.execute("INSERT INTO SUB VALUES("+"\'"+data["subjectname"]+"\'"+","+"\'"+data["subjectcode"]+"\'"+")")
+   conn.commit()
+   return {"status":"Success"}
+
+@app.route('/assignFaculty',methods=['POST'])
+def assignFaculty():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   section=data["section"]
+   subject=data["subject"]
+   faculty=data["faculty"]
+   c.execute("INSERT INTO SUBJECT VALUES("+"\'"+subject+"\'"+","+"\'"+section+"\'"+","+"\'"+faculty+"\')")
+   conn.commit()
+   return {"status":"Success"}
+
+@app.route('/addClassLink',methods=['POST'])
+def addClassLink():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   link=data["classLink"]
+   section=data["section"]
+   time=data["time"]
+   code=data["subcode"]
+   date=data["date"]
+   c.execute("INSERT INTO CLASS VALUES("+"\'"+link+"\'"+","+"\'"+time+"\'"+","+"\'"+code+"\'"+","+"\'"+section+"\'"+","+"\'"+date+"\'"+")")
+
+   conn.commit()
+   return {"status":"Success"}
+
+@app.route('/getSubjectList',methods=['POST'])
+def getSubjectList():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   section=data
+   global uid
+   querya=c.execute("SELECT CODE FROM SUBJECT WHERE SID="+"\'"+section+"\' AND UID="+"\'"+uid+"\'")
+   querya=querya.fetchall()
+   return {"subject":querya}

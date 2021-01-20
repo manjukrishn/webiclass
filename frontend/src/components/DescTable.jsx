@@ -45,12 +45,11 @@ const handleDelete=(e)=>{
       headers:{
         "content_type":"application/json",
       },
-      body:JSON.stringify({link:e})
+      body:JSON.stringify(e)
      }).then(response=>response.json()).then(data=>{console.log(data)});
   }
 return (
     <div style={{ backgroundColor: "#f2f2f0" }}>
-  {!!material.length ? 
       <table className="desc-table">
         <caption
           style={{
@@ -245,7 +244,7 @@ return (
                 >20 Dec 2020</td>
               </tr>
         </tbody>
-      </table> : <Nothing/>}
+      </table>
     </div>
   );
 }
