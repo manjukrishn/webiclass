@@ -38,7 +38,7 @@ body {
   overflow-y: auto;
   position: fixed;
   height: 50vh;
-  width: calc(100vw - 280px);
+  width: calc(100vw - 285px);
   background-color: #fffafa;
   color: #2c365d;
 }

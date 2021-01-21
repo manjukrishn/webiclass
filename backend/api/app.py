@@ -7,7 +7,6 @@ app=Flask(__name__)
 
 role=""
 uid=""
-
 def userLoggedIn(email,password):
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
@@ -208,7 +207,7 @@ def addStudent():
    secid=c.execute("SELECT SID FROM SECTION WHERE NAME="+"\'"+data["section"]+"\'")
    secid=secid.fetchall()
    secid=secid[0][0]
-   c.execute("INSERT INTO STUDENT VALUES("+"\'"+data["studentusn"]+"\'"+","+"\'"+secid+"\'")
+   c.execute("INSERT INTO STUDENT VALUES("+"\'"+data["studentusn"]+"\'"+","+"\'"+secid+"\')")
    conn.commit()
    return {"status":"Success"}
 
@@ -297,6 +296,8 @@ def getSection():
    no_of_students=no_of_students.fetchall()
    no_of_subject=c.execute("SELECT S.SID,COUNT(SU.CODE) FROM SUBJECT SU,SECTION S WHERE SU.SID=S.SID AND S.DEPARTMENT_NAME="+"\'"+dept+"\'")
    no_of_subject=no_of_subject.fetchall()
+   print(no_of_students)
+   print(no_of_subject)
    return {"sections":section,"no_of_students":no_of_students,"no_of_subjects":no_of_subject}
 
 @app.route('/addSection',methods=['POST'])
@@ -374,16 +375,17 @@ def attendance():
    conn=sqlite3.connect('Webiclass.db')
    c=conn.cursor()
    data=request.json
-   usn=data["usn"]
-   name=data["name"]
-   date=data["date"]
-   id=data["id"]
-   link=c.execute("SELECT LINK FROM CLASS WHERE TIME="+"\'"+date+"\'")
+   print(data)
+   link=c.execute("SELECT LINK FROM CLASS WHERE TIME="+"\'"+data["time"]+"\'"+" AND DATE="+"\'"+data["date"]+"\'"+" AND CODE="+"\'"+data["subject"]+"\'"+" AND ID="+"\'"+data["section"]+"\'")
    link=link.fetchall()
-   status=c.execute("SELECT STATUS FROM ATTENDANCE WHERE UID="+"\'"+uid+"\' AND ID="+"\'"+id+"\'")
-   status=status.fetchall()
-   status=status[0][0]
-   status=not status
+   usn=data["USN"]
+   name=data["Name"]
+   section=data["section"]
+   status=data["status"]
+   subject=data["subject"]
+   date=data["date"]
+   id=link[0]+subject
+   print(link)
    c.execute("INSERT INTO ATTENDANCE VALUES("+"\'"+id+"\'"+","+"\'"+status+"\'"+","+"\'"+date+"\'"+","+"\'"+usn+"\'"+","+"\'"+link+"\'")
    conn.commit()
    return {"status":"Success"}
@@ -533,3 +535,29 @@ def getSubjectList():
    querya=c.execute("SELECT CODE FROM SUBJECT WHERE SID="+"\'"+section+"\' AND UID="+"\'"+uid+"\'")
    querya=querya.fetchall()
    return {"subject":querya}
+
+@app.route('/getDate',methods=['POST'])
+def getDate():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   print(data)
+   section=data["section"]
+   subject=data["subject"]
+   query=c.execute("SELECT DATE FROM CLASS WHERE ID="+"\'"+section+"\' AND CODE="+"\'"+subject+"\'")
+   query=query.fetchall()
+   return{"date":query}
+
+@app.route('/getTime',methods=['POST'])
+def getTime():
+   conn=sqlite3.connect('Webiclass.db')
+   c=conn.cursor()
+   data=request.json
+   print(data)
+   section=data["section"]
+   subject=data["subject"]
+   date=data["date"]
+   query=c.execute("SELECT TIME FROM CLASS WHERE ID="+"\'"+section+"\' AND CODE="+"\'"+subject+"\' AND DATE="+"\'"+date+"\'")
+   query=query.fetchall()
+   return{"date":query}
+   

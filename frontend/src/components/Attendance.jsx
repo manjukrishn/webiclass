@@ -66,14 +66,13 @@ function ConfirmationDialogRaw(props) {
    const { onClose, value: valueProp, open, ...other } = props;
    const [value, setValue] = React.useState(valueProp);
    const radioGroupRef = React.useRef(null);
-   const [age, setAge] = React.useState('');
    const [section,setSection]=React.useState('');
    const [sectionId,setSectionId]=React.useState('');
    const [subject,setSubject]=React.useState('');
+   const [subid,setSubjectId]=React.useState();
+   const [dateArr,setDateArr]=React.useState([]);
+   const [timeArr, setTimeArr]=React.useState([]);
  
-   const handleChangeSubject = (event) => {
-    setSubject(event.target.value);
-  };
    const [arr, setArr] = React.useState([
      {
        prof_email: "abcdefffewefwef@gmail.com",
@@ -111,6 +110,44 @@ function ConfirmationDialogRaw(props) {
    })
   },[]);
 
+  const handleSelect=(newSelection)=>{
+    console.log(newSelection)
+    let ar={}
+    if(newSelection.isSelected){
+       ar={
+        ...newSelection.data,
+        date:date,
+        section:sectionId,
+        subject:subject,
+        status:"1",
+        time:time
+      }
+    }
+    else{
+       ar={
+        ...newSelection.data,
+        date:date,
+        section:sectionId,
+        subject:subject,
+        status:"0"
+      }
+    }
+    fetch("/attendance", {
+     method:"POST",
+     cache: "no-cache",
+     headers:{
+         "content_type":"application/json",
+     },
+      body:JSON.stringify(ar)
+     }
+     ).then(response => {
+        return response.json()
+     })
+    .then(json => {  
+      console.log(json) 
+     })
+  }
+
   React.useEffect(()=>{
     fetch("/getSubjectList", {
       method:"POST",
@@ -141,6 +178,74 @@ function ConfirmationDialogRaw(props) {
       }
     })
   };
+  const handleChangeSubject = (event) => {
+    setSubject(event.target.value);
+      subjectArr.map((item,index)=>{
+        if(item[0]===event.target.value){
+          setSubjectId(item[1]);
+          console.log(item[1]);
+          return null;
+        }
+      })
+  };
+  React.useEffect(()=>{
+    const wrapper={
+      section:sectionId,
+      subject:subject
+    }
+    fetch("/getDate", {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+       body:JSON.stringify(wrapper)
+      }
+    ).then(response => {
+    return response.json()
+   })
+   .then(json => {  
+      const arr=[];
+      console.log(json.date);
+      json.date.map((item,index)=>{
+          arr.push({
+            date:item[0]
+          })
+      })
+      console.log(arr);
+      setDateArr(arr);
+   })
+  },[sectionId,subject])
+
+  React.useEffect(()=>{
+    const wrapper={
+      section:sectionId,
+      subject:subject,
+      date:date
+    }
+    fetch("/getTime", {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+       body:JSON.stringify(wrapper)
+      }
+    ).then(response => {
+    return response.json()
+   })
+   .then(json => {  
+      const arr=[];
+      console.log(json.time);
+      json.date.map((item,index)=>{
+          arr.push({
+            time:item[0]
+          })
+      })
+      console.log(arr);
+      setTimeArr(arr);
+   })
+  },[sectionId,subject,date])
    React.useEffect(()=>{
      const cred={
        section:section,
@@ -253,59 +358,51 @@ function ConfirmationDialogRaw(props) {
         </Select>
       </FormControl>}
 
-          <FormControl className={classes.formControl} style={{marginLeft:"5%"}}>
-              <TextField
-                id="date"
-                label="Date"
-                type="date"
-                name="date"
-                value={date}
-                onChange={handleDateChange}
-                defaultValue={new Date()}
-                className={classes.textField}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-           </FormControl>
-          <FormControl className={classes.formControl} style={{marginLeft:"5%"}}>
-            <TextField
-               id="time"
-               label="Class Time"
-               type="time"
-               name="time"
-                onChange={handleTimeChange}
-               value={time}
-               defaultValue="07:30"
-               className={classes.textField}
-               InputLabelProps={{
-                  shrink: true,
-               }}
-               inputProps={{
-                  step: 300, // 5 min
-               }}
-            />
-           </FormControl>
-         </DialogTitle>
+      {!!sectionId &&
+      <FormControl variant="filled" className={classes.formControl}>
+        <InputLabel id="demo-simple-select-filled-label">Date</InputLabel>
+        <Select
+          labelId="demo-simple-select-filled-label"
+          id="demo-simple-select-filled"
+          value={date}
+          onChange={handleDateChange}
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {dateArr.map((item,index)=>{
+          return(
+          <MenuItem value={item.date}>{item.date}</MenuItem>
+          )
+        })}
+        </Select>
+      </FormControl>}
+      {!!sectionId &&
+       <FormControl variant="filled" className={classes.formControl}>
+          <InputLabel id="demo-simple-select-filled-label">Time</InputLabel>
+          <Select
+            labelId="demo-simple-select-filled-label"
+            id="demo-simple-select-filled"
+            value={time}
+            onChange={handleTimeChange}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {timeArr.map((item,index)=>{
+            return(
+            <MenuItem value={item.time}>{item.time}</MenuItem>
+             )
+             })}
+           </Select>
+        </FormControl>}
+      </DialogTitle>
          
          <DialogContent dividers style={{ backgroundColor: "#f2f2f0" }}>
          <div style={{ height: 400, width: '100%' }}>
-             <DataGrid rows={rows} columns={columns} pageSize={5} checkboxSelection onSelectionChange={(newSelection) => {
-             fetch("/attendance", {
-              method:"POST",
-              cache: "no-cache",
-              headers:{
-                  "content_type":"application/json",
-              },
-               body:JSON.stringify({cred:newSelection.rows})
-              }
-              ).then(response => {
-                 return response.json()
-              })
-             .then(json => {  
-               console.log(json) 
-              })
-         }}/>
+             <DataGrid rows={rows} columns={columns} pageSize={5} checkboxSelection 
+             onRowSelected={handleSelect}
+         />
           </div>
          </DialogContent>
 
