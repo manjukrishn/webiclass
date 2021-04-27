@@ -1,5 +1,5 @@
 # Webiclass
-Webiclass is an online class documentation system which acts as platform for teachers to communicate ongoings of a virtual class with <br> students. 
+Webiclass is an online class documentation system which acts as platform for teachers to communicate ongoings of <br> a virtual class with students. 
 Few notable features of Webiclass : 
 <img src="https://user-images.githubusercontent.com/58678684/116209917-00612e80-a760-11eb-9291-8f0289a7cc30.png" align="right" width="250" height="100"/>
 * Share materials like notes, online class links, attendance reports etc. 
